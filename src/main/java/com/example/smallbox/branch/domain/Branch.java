@@ -1,8 +1,9 @@
-package com.example.smallbox.brach.domain;
+package com.example.smallbox.branch.domain;
 
 import com.example.smallbox.shared.domain.BranchID;
 import com.example.smallbox.shared.domain.LocationId;
 import com.example.smallbox.shared.domain.Phone;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class Branch {
     private final BranchID id;
     private String name;

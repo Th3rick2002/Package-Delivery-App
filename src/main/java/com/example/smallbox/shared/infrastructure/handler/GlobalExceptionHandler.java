@@ -1,5 +1,7 @@
 package com.example.smallbox.shared.infrastructure.handler;
 
+import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.domain.exception.DomainException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -12,33 +14,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return createResponse("BAD_REQUEST", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid credentials"),
-                HttpStatus.UNAUTHORIZED
-        );
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        return createResponse("UNAUTHORIZED", "Invalid credentials", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied"),
-                HttpStatus.FORBIDDEN
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        return createResponse("FORBIDDEN", "Access denied", HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ApiErrorResponse> handleDomainException(DomainException ex) {
+        ApiErrorResponse response = new ApiErrorResponse(
+                ex.getErrorCode(),
+                ex.getMessage(),
+                ex.getHttpStatus(),
+                LocalDateTime.now()
         );
+
+        return ResponseEntity.status(ex.getHttpStatus()).body(response);
     }
 
     @Override
@@ -54,15 +60,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        return new ResponseEntity<>(new ErrorResponse(status.value(), errors), status);
+        ApiErrorResponse response = new ApiErrorResponse(
+                "VALIDATION_ERROR",
+                errors,
+                status.value(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception ex) {
+    public ResponseEntity<ApiErrorResponse> handleAllUncaughtException(Exception ex) {
         ex.printStackTrace();
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred"),
-                HttpStatus.INTERNAL_SERVER_ERROR
+        return createResponse("INTERNAL_SERVER_ERROR", "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ApiErrorResponse> createResponse(String code, String message, HttpStatus status) {
+        ApiErrorResponse response = new ApiErrorResponse(
+                code,
+                message,
+                status.value(),
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(response, status);
     }
 }

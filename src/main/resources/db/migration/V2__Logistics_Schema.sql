@@ -18,7 +18,7 @@ CREATE TABLE recipient (
 CREATE TABLE branch (
   branch_id SERIAL PRIMARY KEY,
   name_branch VARCHAR(100),
-  city_id INT NOT NULL REFERENCES department(id_department),
+  department_id INT NOT NULL REFERENCES department(id_department),
   phone_branch VARCHAR(20),
   created_at TIMESTAMP DEFAULT now(),
   created_by UUID,
