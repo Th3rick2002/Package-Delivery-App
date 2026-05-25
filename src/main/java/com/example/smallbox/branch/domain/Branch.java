@@ -1,4 +1,4 @@
-package com.example.smallbox.brach.domain;
+package com.example.smallbox.branch.domain;
 
 import com.example.smallbox.shared.domain.BranchID;
 import com.example.smallbox.shared.domain.LocationId;

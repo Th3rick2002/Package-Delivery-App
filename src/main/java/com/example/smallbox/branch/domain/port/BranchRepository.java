@@ -1,6 +1,6 @@
-package com.example.smallbox.brach.domain.port;
+package com.example.smallbox.branch.domain.port;
 
-import com.example.smallbox.brach.domain.Branch;
+import com.example.smallbox.branch.domain.Branch;
 
 import java.util.List;
 import java.util.Optional;

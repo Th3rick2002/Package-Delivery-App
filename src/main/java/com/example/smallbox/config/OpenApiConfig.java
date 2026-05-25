@@ -12,8 +12,8 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Mi API en Spring Boot")
+                        .title("Small Box API documentation.")
                         .version("1.0")
-                        .description("Documentación de endpoints usando Scalar"));
+                        .description("Documentación de endpoints"));
     }
 }
