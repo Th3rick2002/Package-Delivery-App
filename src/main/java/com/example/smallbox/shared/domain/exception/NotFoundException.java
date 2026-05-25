@@ -1,7 +1,12 @@
 package com.example.smallbox.shared.domain.exception;
 
-public class NotFoundException extends RuntimeException {
-  public NotFoundException(String message) {
-    super(message);
-  }
+public abstract class NotFoundException extends DomainException {
+    protected NotFoundException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return 404;
+    }
 }

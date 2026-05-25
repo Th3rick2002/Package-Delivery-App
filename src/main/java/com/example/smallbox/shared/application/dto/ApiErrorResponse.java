@@ -1,4 +1,11 @@
 package com.example.smallbox.shared.application.dto;
 
-public record ApiErrorResponse() {
+import java.time.LocalDateTime;
+
+public record ApiErrorResponse(
+        String code,
+        String message,
+        int status,
+        LocalDateTime timestamp
+) {
 }
