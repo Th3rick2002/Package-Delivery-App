@@ -15,7 +15,7 @@ public class BranchMapper {
         return Branch.builder()
                 .id(new BranchID(entity.getBranchId()))
                 .name(entity.getNameBranch())
-                .city(new LocationId(entity.getDepartmentId().getIdDepartment()))
+                .city(new LocationId(entity.getDepartment().getIdDepartment()))
                 .phone(new Phone(entity.getPhoneBranch()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -29,7 +29,7 @@ public class BranchMapper {
         BranchEntity entity = new BranchEntity();
         entity.setBranchId(branch.getId().id());
         entity.setNameBranch(branch.getName());
-        entity.setDepartmentId(DepartmentMapper.toJpaEntity(branch.getCity()));
+        entity.setDepartment(DepartmentMapper.toJpaEntity(branch.getCity()));
         entity.setPhoneBranch(branch.getPhone().value());
         entity.setCreatedAt(branch.getCreatedAt());
         entity.setUpdatedAt(branch.getUpdatedAt());

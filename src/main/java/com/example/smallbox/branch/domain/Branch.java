@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 public class Branch {
     private final BranchID id;
     private String name;
-    private final LocationId city;
-    private final Phone phone;
+    private LocationId city;
+    private Phone phone;
 
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -49,6 +49,16 @@ public class Branch {
         newName = newName.trim().toUpperCase();
 
         this.name = newName;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateDepartment(LocationId id) {
+        this.city = id;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updatePhone(Phone phone) {
+        this.phone = phone;
         this.updatedAt = LocalDateTime.now();
     }
 

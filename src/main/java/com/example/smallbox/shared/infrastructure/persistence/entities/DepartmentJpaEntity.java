@@ -16,7 +16,7 @@ public class DepartmentJpaEntity {
     private Integer idDepartment;
 
     @Column(name = "deparment_name", nullable = false)
-    private String deparmentName;
+    private String departmentName;
 
     @Column(name = "delivery_zone_code")
     private String deliveryZoneCode;
