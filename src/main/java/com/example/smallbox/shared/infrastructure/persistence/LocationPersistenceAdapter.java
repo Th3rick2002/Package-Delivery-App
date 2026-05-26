@@ -23,7 +23,7 @@ public class LocationPersistenceAdapter implements LocationRepository {
     public Optional<LocationInfo> findById(LocationId locationId) {
         return this.jpaDepartmentRepository.findById(locationId.cityId())
                 .map(departmentJpaEntity -> new LocationInfo(
-                        departmentJpaEntity.getDeparmentName(),
+                        departmentJpaEntity.getDepartmentName(),
                         departmentJpaEntity.getCountry().getCountryName(),
                         departmentJpaEntity.getDeliveryZoneCode()
                 ));

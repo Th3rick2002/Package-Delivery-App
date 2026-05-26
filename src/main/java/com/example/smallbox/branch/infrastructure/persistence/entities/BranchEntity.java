@@ -28,8 +28,8 @@ public class BranchEntity {
     private String nameBranch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "department_id", nullable = false)
-    private DepartmentJpaEntity departmentId;
+    @JoinColumn(name = "department_id")
+    private DepartmentJpaEntity department;
 
     @Column(name = "phone_branch", nullable = false, length = 20)
     private String phoneBranch;
@@ -50,5 +50,5 @@ public class BranchEntity {
     private LocalDateTime deletedAt;
 
     @Column(name = "deleted_by")
-    private LocalDateTime deletedBy;
+    private UUID deletedBy;
 }

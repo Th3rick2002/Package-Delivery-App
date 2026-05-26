@@ -18,7 +18,7 @@ public class GetCitiesService {
         return jpaDepartmentRepository.findAll().stream()
                 .map(dept -> new CityResponse(
                         dept.getIdDepartment(),
-                        dept.getDeparmentName(),
+                        dept.getDepartmentName(),
                         dept.getCountry().getCountryName()
                 ))
                 .toList();
