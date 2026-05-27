@@ -1,34 +1,39 @@
 package com.example.smallbox.shipment.application.dto;
 
-import java.math.BigDecimal;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.util.List;
 import java.util.UUID;
 
 public record CreateShipmentRequest(
-        UUID senderId,
-        RecipientRequest recipient,
-        Integer originBranchId,
-        Integer destinationBranchId,
-        List<PackageRequest> packages,
-        BigDecimal totalAmount,
-        String currency
+        @NotNull UUID senderId,
+        @NotNull @Valid RecipientRequest recipient,
+        @NotNull Integer originBranchId,
+        @NotNull Integer destinationBranchId,
+        @NotNull Integer destinationCityId,
+        @NotBlank String exactAddress,
+        @NotEmpty @Valid List<PackageRequest> packages
 ) {
     public record RecipientRequest(
-            String firstName,
+            @NotBlank String firstName,
             String secondName,
-            String lastName,
+            @NotBlank String lastName,
             String secondLastName,
-            String phone,
-            String email
+            @NotBlank String phone,
+            @NotBlank String email
     ) {}
 
     public record PackageRequest(
-            String description,
-            double weight,
-            String weightUnit,
-            double length,
-            double width,
-            double height,
-            String dimensionsUnit
+            @NotBlank String description,
+            @Positive double weight,
+            @NotBlank String weightUnit,
+            @Positive double length,
+            @Positive double width,
+            @Positive double height,
+            @NotBlank String dimensionsUnit
     ) {}
 }
