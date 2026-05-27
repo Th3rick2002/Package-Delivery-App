@@ -30,7 +30,7 @@ public class BranchPersistenceAdapter implements BranchRepository {
 
     @Override
     public Optional<Branch> findByLocationId(Integer locationId) {
-        return jpaBranchRepository.findByDepartmentId(locationId).map(BranchMapper::toDomain);
+        return jpaBranchRepository.findByDepartment_IdDepartment(locationId).map(BranchMapper::toDomain);
     }
 
     @Override
