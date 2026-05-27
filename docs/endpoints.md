@@ -19,3 +19,17 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 | `POST` | `/api/v1/users` | Crea un nuevo usuario (Empleado/Admin/Cliente). | Admin / SuperAdmin |
 | `DELETE` | `/api/v1/users/{id}` | Desactiva/Elimina un usuario. | Admin / SuperAdmin |
 | `PUT` | `/api/v1/users/profile` | Actualiza el perfil del usuario logueado. | Autenticado |
+
+## Módulo: Sucursales (`/branches`)
+
+| Método | Endpoint | Descripción | Acceso |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/branches` | Lista todas las sucursales activas. | Autenticado |
+| `GET` | `/api/v1/branches/{id}` | Obtiene detalles de una sucursal por ID. | Autenticado |
+| `GET` | `/api/v1/branches/location/{locId}` | Obtiene la sucursal asignada a una ubicación. | Autenticado |
+| `POST` | `/api/v1/branches` | Crea una nueva sucursal. | SuperAdmin |
+| `PATCH` | `/api/v1/branches/{id}` | Actualiza datos parciales de una sucursal. | SuperAdmin / Admin |
+| `DELETE` | `/api/v1/branches/{id}` | Elimina (soft-delete) una sucursal. | SuperAdmin |
+| `GET` | `/api/v1/branches/{id}/users` | Lista usuarios asignados a una sucursal. | Admin / BranchAdmin |
+| `POST` | `/api/v1/branches/{id}/users` | Asigna un empleado/admin a una sucursal. | Admin / SuperAdmin |
+| `PATCH` | `/api/v1/branches/{id}/users/{uId}/status` | Activa/Desactiva acceso de un usuario a la sucursal. | Admin / BranchAdmin |

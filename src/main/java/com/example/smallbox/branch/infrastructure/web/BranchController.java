@@ -24,6 +24,16 @@ public class BranchController {
         return ResponseEntity.ok(branchService.findAll());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<BranchResponse> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(branchService.getById(id));
+    }
+
+    @GetMapping("/location/{locationId}")
+    public ResponseEntity<BranchResponse> getByLocationId(@PathVariable Integer locationId) {
+        return ResponseEntity.ok(branchService.getByLocationId(locationId));
+    }
+
     @PostMapping
     public ResponseEntity<BranchResponse> create(@Valid @RequestBody CreateBranchRequest request) {
         return ResponseEntity.ok(branchService.create(request));
