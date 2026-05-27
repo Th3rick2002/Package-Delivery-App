@@ -52,14 +52,32 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | :--- | :--- | :--- |
 | `BRANCH_NOT_FOUND` | `NotFoundException` | La sucursal solicitada no existe en el sistema. |
 | `BRANCH_ALREADY_EXISTS`| `ConflictException` | Ya existe una sucursal con el mismo nombre o código. |
+| `LOCATION_NOT_FOUND` | `NotFoundException` | La ubicación (departamento) especificada no existe. |
+| `BRANCH_INACTIVE` | `UnprocessableEntityException` | La sucursal está inactiva o eliminada y no permite asignaciones. |
+| `BRANCH_USER_NOT_FOUND`| `NotFoundException` | El usuario no está asignado a la sucursal especificada. |
+| `BRANCH_USER_ALREADY_EXISTS`| `ConflictException` | El usuario ya se encuentra asignado a la sucursal. |
+| `INVALID_ROLE_FOR_BRANCH`| `UnprocessableEntityException` | El rol del usuario no es apto para ser asignado a una sucursal. |
 
 ### Módulo: Auth / User
 | Código (`code`) | Base Exception | Descripción |
 | :--- | :--- | :--- |
 | `USER_NOT_FOUND` | `NotFoundException` | El usuario solicitado no existe. |
+| `ROLE_NOT_FOUND` | `NotFoundException` | El rol solicitado no existe. |
 | `EMAIL_ALREADY_IN_USE`| `ConflictException` | El correo electrónico ya está registrado. |
 | `INVALID_CREDENTIALS` | `UnauthorizedException` | Usuario o contraseña incorrectos. |
+| `INVALID_TOKEN` | `UnauthorizedException` | El token JWT es inválido. |
 | `EXPIRED_TOKEN` | `UnauthorizedException` | El token JWT ha expirado. |
+| `SESSION_NOT_FOUND` | `NotFoundException` | La sesión de refresco no existe. |
+| `TOKEN_REVOKED` | `UnauthorizedException` | El token ha sido revocado por seguridad (detección de reúso). |
+
+### Módulo: Shipment
+| Código (`code`) | Base Exception | Descripción |
+| :--- | :--- | :--- |
+| `SHIPMENT_NOT_FOUND` | `NotFoundException` | El envío solicitado no existe. |
+| `INVALID_SHIPMENT_STATUS`| `UnprocessableEntityException` | La operación no es permitida para el estado actual del envío. |
+| `TRACKING_NUMBER_NOT_FOUND`| `NotFoundException` | No se encontró ningún envío con el número de guía proporcionado. |
+| `PACKAGE_NOT_FOUND` | `NotFoundException` | El paquete especificado no existe en el envío. |
+| `INVALID_PACKAGE_DIMENSIONS`| `BadRequestException` | Las dimensiones o peso del paquete no cumplen con los requisitos. |
 
 ---
 
