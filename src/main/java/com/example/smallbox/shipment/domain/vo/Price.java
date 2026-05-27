@@ -16,7 +16,7 @@ public record Price(BigDecimal amount, String currency) {
         amount = amount.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public Price of(BigDecimal amount) {
+    public static Price of(BigDecimal amount) {
         return new Price(amount, "USD");
     }
 
