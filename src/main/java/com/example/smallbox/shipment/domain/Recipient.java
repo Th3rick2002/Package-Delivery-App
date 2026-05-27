@@ -10,7 +10,7 @@ public record Recipient(
         UUID recipientId,
         String firstName,
         String secondName,
-        String lastname,
+        String lastName,
         String secondLastName,
         Phone phone,
         Email email
@@ -20,7 +20,7 @@ public record Recipient(
     public Recipient {
         firstName = validateName(firstName, "First name", true);
         secondName = validateName(secondName, "Second name", false);
-        lastname = validateName(lastname, "Last name", true);
+        lastName = validateName(lastName, "Last name", true);
         secondLastName = validateName(secondLastName, "Second last name", false);
 
         if (phone == null) throw new IllegalArgumentException("Phone is required");
@@ -47,31 +47,31 @@ public record Recipient(
     public static Recipient create(
             String firstName,
             String secondName,
-            String lastname,
+            String lastName,
             String secondLastName,
             Phone phone,
             Email email
     ) {
-        return new Recipient(null, firstName, secondName, lastname, secondLastName, phone, email);
+        return new Recipient(null, firstName, secondName, lastName, secondLastName, phone, email);
     }
 
     public static Recipient withId(
             UUID id,
             String firstName,
             String secondName,
-            String lastname,
+            String lastName,
             String secondLastName,
             Phone phone,
             Email email
     ) {
         if (id == null) throw new IllegalArgumentException("ID is required for an existing recipient");
-        return new Recipient(id, firstName, secondName, lastname, secondLastName, phone, email);
+        return new Recipient(id, firstName, secondName, lastName, secondLastName, phone, email);
     }
 
     public String getFullName() {
         StringBuilder sb = new StringBuilder(firstName);
         if (secondName != null) sb.append(" ").append(secondName);
-        sb.append(" ").append(lastname);
+        sb.append(" ").append(lastName);
         if (secondLastName != null) sb.append(" ").append(secondLastName);
         return sb.toString();
     }

@@ -33,3 +33,14 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 | `GET` | `/api/v1/branches/{id}/users` | Lista usuarios asignados a una sucursal. | Admin / BranchAdmin |
 | `POST` | `/api/v1/branches/{id}/users` | Asigna un empleado/admin a una sucursal. | Admin / SuperAdmin |
 | `PATCH` | `/api/v1/branches/{id}/users/{uId}/status` | Activa/Desactiva acceso de un usuario a la sucursal. | Admin / BranchAdmin |
+
+## Módulo: Envíos (`/shipments`)
+
+| Método | Endpoint | Descripción | Acceso |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/shipments` | Crea un nuevo envío con sus paquetes y destinatario. | Cliente / Empleado |
+| `GET` | `/api/v1/shipments` | Lista los envíos (filtrado por rol). | Autenticado |
+| `GET` | `/api/v1/shipments/{id}` | Obtiene detalles de un envío por UUID. | Autenticado |
+| `GET` | `/api/v1/shipments/tracking/{number}` | Consulta un envío por su número de guía. | Público / Autenticado |
+| `PATCH` | `/api/v1/shipments/{id}/status` | Actualiza el estado de un envío. | Empleado / Admin |
+| `GET` | `/api/v1/shipments/my-shipments` | Lista los envíos realizados por el usuario actual. | Cliente |

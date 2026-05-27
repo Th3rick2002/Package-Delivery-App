@@ -70,6 +70,15 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | `SESSION_NOT_FOUND` | `NotFoundException` | La sesión de refresco no existe. |
 | `TOKEN_REVOKED` | `UnauthorizedException` | El token ha sido revocado por seguridad (detección de reúso). |
 
+### Módulo: Shipment
+| Código (`code`) | Base Exception | Descripción |
+| :--- | :--- | :--- |
+| `SHIPMENT_NOT_FOUND` | `NotFoundException` | El envío solicitado no existe. |
+| `INVALID_SHIPMENT_STATUS`| `UnprocessableEntityException` | La operación no es permitida para el estado actual del envío. |
+| `TRACKING_NUMBER_NOT_FOUND`| `NotFoundException` | No se encontró ningún envío con el número de guía proporcionado. |
+| `PACKAGE_NOT_FOUND` | `NotFoundException` | El paquete especificado no existe en el envío. |
+| `INVALID_PACKAGE_DIMENSIONS`| `BadRequestException` | Las dimensiones o peso del paquete no cumplen con los requisitos. |
+
 ---
 
 ## Guía de Implementación para Desarrollo
