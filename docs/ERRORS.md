@@ -62,9 +62,13 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | Código (`code`) | Base Exception | Descripción |
 | :--- | :--- | :--- |
 | `USER_NOT_FOUND` | `NotFoundException` | El usuario solicitado no existe. |
+| `ROLE_NOT_FOUND` | `NotFoundException` | El rol solicitado no existe. |
 | `EMAIL_ALREADY_IN_USE`| `ConflictException` | El correo electrónico ya está registrado. |
 | `INVALID_CREDENTIALS` | `UnauthorizedException` | Usuario o contraseña incorrectos. |
+| `INVALID_TOKEN` | `UnauthorizedException` | El token JWT es inválido. |
 | `EXPIRED_TOKEN` | `UnauthorizedException` | El token JWT ha expirado. |
+| `SESSION_NOT_FOUND` | `NotFoundException` | La sesión de refresco no existe. |
+| `TOKEN_REVOKED` | `UnauthorizedException` | El token ha sido revocado por seguridad (detección de reúso). |
 
 ---
 

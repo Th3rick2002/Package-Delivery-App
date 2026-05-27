@@ -5,6 +5,9 @@ import com.example.smallbox.auth.domain.Session;
 import com.example.smallbox.auth.infrastructure.security.jwt.JWTType;
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtService;
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtTokenDTO;
+import com.example.smallbox.auth.domain.exception.InvalidTokenException;
+import com.example.smallbox.auth.domain.exception.SessionNotFoundException;
+import com.example.smallbox.auth.domain.exception.TokenRevokedException;
 import com.example.smallbox.shared.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,15 +36,15 @@ public class RefreshTokenService {
     @Transactional
     public void validateAndRevokeOld(String refreshToken) {
         if (!jwtService.isValid(refreshToken) || jwtService.isTokenExpired(refreshToken)) {
-            throw new IllegalArgumentException("Invalid or expired refresh token");
+            throw new InvalidTokenException("Invalid or expired refresh token");
         }
 
         Session session = authRepository.findByTokenHash(refreshToken)
-                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+                .orElseThrow(SessionNotFoundException::new);
 
         if (!session.isValid()) {
             authRepository.revokeAllByUserId(session.getUserId());
-            throw new IllegalArgumentException("Refresh token revoked. Potential reuse detected.");
+            throw new TokenRevokedException("Refresh token revoked. Potential reuse detected.");
         }
 
         session.revoke();

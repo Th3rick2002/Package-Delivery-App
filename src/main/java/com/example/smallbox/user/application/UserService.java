@@ -10,6 +10,9 @@ import com.example.smallbox.user.domain.Role;
 import com.example.smallbox.user.domain.RoleRepository;
 import com.example.smallbox.user.domain.User;
 import com.example.smallbox.user.domain.UserRepository;
+import com.example.smallbox.user.domain.exceptions.EmailAlreadyInUseException;
+import com.example.smallbox.user.domain.exceptions.RoleNotFoundException;
+import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,11 +32,11 @@ public class UserService {
     public UserResponse createUser(CreateUserRequest request) {
         Email email = new Email(request.email());
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("User with email " + request.email() + " already exists");
+            throw new EmailAlreadyInUseException(request.email());
         }
 
         Role role = roleRepository.findById(request.roleId())
-                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
+                .orElseThrow(() -> new RoleNotFoundException(request.roleId()));
 
         User user = User.create(
                 role,
@@ -54,7 +57,7 @@ public class UserService {
     public UserResponse getUserById(UUID id) {
         return userRepository.findById(new UserId(id))
                 .map(this::mapToResponse)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id.toString()));
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +81,7 @@ public class UserService {
                         user.getHashPassword(),
                         user.getRole().getName()
                 ))
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     private UserResponse mapToResponse(User user) {
