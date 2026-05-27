@@ -27,6 +27,12 @@ public class AuthController {
     @Value("${jwt.cookie.secure:false}")
     private boolean secureCookie;
 
+    @Value("${jwt.expiration-time-ms}")
+    private long accessTokenMs;
+
+    @Value("${jwt.expiration-time-refresh-ms}")
+    private long refreshTokenMs;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest request,
@@ -37,9 +43,11 @@ public class AuthController {
         String ua = httpRequest.getHeader("User-Agent");
         
         JwtTokenDTO tokens = authService.login(request, ip, ua);
-        setTokenCookie(tokens.refreshToken(), response);
+        
+        setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
+        setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
 
-        return ResponseEntity.ok(Map.of("token", tokens.accessToken()));
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/refresh")
@@ -56,27 +64,45 @@ public class AuthController {
         String ua = httpRequest.getHeader("User-Agent");
 
         JwtTokenDTO tokens = refreshTokenService.rotateTokens(refreshToken, ip, ua);
-        setTokenCookie(tokens.refreshToken(), response);
+        
+        setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
+        setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
 
-        return ResponseEntity.ok(Map.of("token", tokens.accessToken()));
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            @CookieValue(name = "refreshToken", required = false) String refreshToken
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response
     ) {
         if (refreshToken != null) {
             refreshTokenService.logout(refreshToken);
         }
+        
+        clearTokenCookie("accessToken", "/", response);
+        clearTokenCookie("refreshToken", "/api/v1/auth/refresh", response);
+        
         return ResponseEntity.ok().build();
     }
 
-    private void setTokenCookie(String token, HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
+    private void setTokenCookie(String name, String token, long maxAge, String path, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(name, token)
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/v1/auth/refresh")
-                .maxAge(7 * 24 * 60 * 60)
+                .path(path)
+                .maxAge(maxAge)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    private void clearTokenCookie(String name, String path, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(secureCookie)
+                .path(path)
+                .maxAge(0)
                 .sameSite("Strict")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
