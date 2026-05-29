@@ -4,6 +4,7 @@ import com.example.smallbox.shared.domain.BranchID;
 import com.example.smallbox.shared.domain.LocationId;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
+import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
 import com.example.smallbox.shipment.domain.vo.Price;
 import com.example.smallbox.shipment.domain.vo.TrackingNumber;
 
@@ -28,17 +29,39 @@ public record Shipment(
         LocalDateTime createdAt
 ) {
     public Shipment {
-        if (trackingNumber == null) throw new IllegalArgumentException("Tracking number is required");
-        if (senderId == null) throw new IllegalArgumentException("Sender ID is required");
-        if (recipient == null) throw new IllegalArgumentException("Recipient is required");
-        if (destinationCityId == null) throw new IllegalArgumentException("Destination city is required");
-        if (exactAddress == null || exactAddress.isBlank()) throw new IllegalArgumentException("Exact address is required");
-        if (originBranchId == null) throw new IllegalArgumentException("Origin branch is required");
-        if (destinationBranchId == null) throw new IllegalArgumentException("Destination branch is required");
-        if (status == null) throw new IllegalArgumentException("Status is required");
-        if (packages == null || packages.isEmpty()) throw new IllegalArgumentException("At least one package is required");
-        if (totalPrice == null) throw new IllegalArgumentException("Total price is required");
-        if (createdAt == null) throw new IllegalArgumentException("Creation date is required");
+        if (trackingNumber == null) {
+            throw new ShipmentValidationException("TRACKING_NUMBER_REQUIRED", "Tracking number is required");
+        }
+        if (senderId == null) {
+            throw new ShipmentValidationException("SENDER_REQUIRED", "Sender ID is required");
+        }
+        if (recipient == null) {
+            throw new ShipmentValidationException("RECIPIENT_REQUIRED", "Recipient is required");
+        }
+        if (destinationCityId == null) {
+            throw new ShipmentValidationException("DESTINATION_CITY_REQUIRED", "Destination city is required");
+        }
+        if (exactAddress == null || exactAddress.isBlank()) {
+            throw new ShipmentValidationException("EXACT_ADDRESS_REQUIRED", "Exact address is required");
+        }
+        if (originBranchId == null) {
+            throw new ShipmentValidationException("ORIGIN_BRANCH_REQUIRED", "Origin branch is required");
+        }
+        if (destinationBranchId == null) {
+            throw new ShipmentValidationException("DESTINATION_BRANCH_REQUIRED", "Destination branch is required");
+        }
+        if (status == null) {
+            throw new ShipmentValidationException("SHIPMENT_STATUS_REQUIRED", "Status is required");
+        }
+        if (packages == null || packages.isEmpty()) {
+            throw new ShipmentValidationException("PACKAGE_REQUIRED", "At least one package is required");
+        }
+        if (totalPrice == null) {
+            throw new ShipmentValidationException("TOTAL_PRICE_REQUIRED", "Total price is required");
+        }
+        if (createdAt == null) {
+            throw new ShipmentValidationException("CREATION_DATE_REQUIRED", "Creation date is required");
+        }
 
         exactAddress = exactAddress.trim();
         packages = Collections.unmodifiableList(new ArrayList<>(packages));
@@ -104,7 +127,7 @@ public record Shipment(
 
     private static Price calculateBasePrice(List<Package> packages) {
         if (packages == null || packages.isEmpty()) {
-            throw new IllegalArgumentException("At least one package is required");
+            throw new ShipmentValidationException("PACKAGE_REQUIRED", "At least one package is required");
         }
 
         BigDecimal amount = packages.stream()

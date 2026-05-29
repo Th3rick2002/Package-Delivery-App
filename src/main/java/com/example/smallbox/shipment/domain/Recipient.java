@@ -2,6 +2,7 @@ package com.example.smallbox.shipment.domain;
 
 import com.example.smallbox.shared.domain.Email;
 import com.example.smallbox.shared.domain.Phone;
+import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -23,23 +24,34 @@ public record Recipient(
         lastName = validateName(lastName, "Last name", true);
         secondLastName = validateName(secondLastName, "Second last name", false);
 
-        if (phone == null) throw new IllegalArgumentException("Phone is required");
-        if (email == null) throw new IllegalArgumentException("Email is required");
+        if (phone == null) throw new ShipmentValidationException("RECIPIENT_PHONE_REQUIRED", "Phone is required");
+        if (email == null) throw new ShipmentValidationException("RECIPIENT_EMAIL_REQUIRED", "Email is required");
     }
 
     private static String validateName(String name, String fieldName, boolean isRequired) {
         if (name == null || name.isBlank()) {
-            if (isRequired) throw new IllegalArgumentException(fieldName + " cannot be empty");
+            if (isRequired) {
+                throw new ShipmentValidationException(
+                        "RECIPIENT_NAME_REQUIRED",
+                        fieldName + " cannot be empty"
+                );
+            }
             return null;
         }
 
         String cleanedName = name.trim();
 
         if (cleanedName.length() < 3)
-            throw new IllegalArgumentException(fieldName + " must be at least 3 characters");
+            throw new ShipmentValidationException(
+                    "INVALID_RECIPIENT_NAME_LENGTH",
+                    fieldName + " must be at least 3 characters"
+            );
 
         if (!NAME_PATTERN.matcher(cleanedName).matches())
-            throw new IllegalArgumentException(fieldName + " contains invalid characters");
+            throw new ShipmentValidationException(
+                    "INVALID_RECIPIENT_NAME",
+                    fieldName + " contains invalid characters"
+            );
 
         return cleanedName.toUpperCase();
     }
@@ -64,7 +76,12 @@ public record Recipient(
             Phone phone,
             Email email
     ) {
-        if (id == null) throw new IllegalArgumentException("ID is required for an existing recipient");
+        if (id == null) {
+            throw new ShipmentValidationException(
+                    "RECIPIENT_ID_REQUIRED",
+                    "ID is required for an existing recipient"
+            );
+        }
         return new Recipient(id, firstName, secondName, lastName, secondLastName, phone, email);
     }
 

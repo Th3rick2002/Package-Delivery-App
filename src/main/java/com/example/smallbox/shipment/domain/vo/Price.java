@@ -1,16 +1,18 @@
 package com.example.smallbox.shipment.domain.vo;
 
+import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public record Price(BigDecimal amount, String currency) {
     public Price {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price amount cannot be null or negative");
+            throw new ShipmentValidationException("INVALID_PRICE_AMOUNT", "Price amount must be greater than zero");
         }
 
         if (currency == null || currency.isBlank()) {
-            throw new IllegalArgumentException("Currency is required");
+            throw new ShipmentValidationException("CURRENCY_REQUIRED", "Currency is required");
         }
 
         amount = amount.setScale(2, RoundingMode.HALF_UP);
@@ -38,8 +40,10 @@ public record Price(BigDecimal amount, String currency) {
 
     private void validateSameCurrency(Price other) {
         if (!this.currency.equals(other.currency)) {
-            throw new IllegalArgumentException("Cannot operate with different currencies: "
-                    + this.currency + " and " + other.currency);
+            throw new ShipmentValidationException(
+                    "CURRENCY_MISMATCH",
+                    "Cannot operate with different currencies: " + this.currency + " and " + other.currency
+            );
         }
     }
 }
