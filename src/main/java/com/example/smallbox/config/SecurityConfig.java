@@ -1,4 +1,4 @@
-package com.example.smallbox.auth.infrastructure.security;
+package com.example.smallbox.config;
 
 import com.example.smallbox.auth.infrastructure.security.filter.JwtAuthenticationFilter;
 import com.example.smallbox.auth.infrastructure.security.handler.CustomAccessDeniedHandler;
@@ -47,7 +47,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/docs/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/docs/**", "/v3/api-docs/**", "/scalar/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
