@@ -1,6 +1,8 @@
 package com.example.smallbox.shipment.domain.vo;
 
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.DimensionsRequiredException;
+import com.example.smallbox.shipment.domain.exception.InvalidDimensionValueException;
+import com.example.smallbox.shipment.domain.exception.UnsupportedDimensionUnitException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,27 +12,24 @@ public record Dimensions(BigDecimal length, BigDecimal width, BigDecimal height,
 
     public Dimensions {
         if (length == null || width == null || height == null) {
-            throw new ShipmentValidationException("DIMENSIONS_REQUIRED", "Dimensions are required");
+            throw new DimensionsRequiredException();
         }
         if (length.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ShipmentValidationException("INVALID_DIMENSION_LENGTH", "Length must be greater than zero");
+            throw new InvalidDimensionValueException("length", length.toString());
         }
         if (width.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ShipmentValidationException("INVALID_DIMENSION_WIDTH", "Width must be greater than zero");
+            throw new InvalidDimensionValueException("width", width.toString());
         }
         if (height.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ShipmentValidationException("INVALID_DIMENSION_HEIGHT", "Height must be greater than zero");
+            throw new InvalidDimensionValueException("height", height.toString());
         }
         if (unit == null || unit.isBlank()) {
-            throw new ShipmentValidationException("DIMENSION_UNIT_REQUIRED", "Dimension unit is required");
+            throw new UnsupportedDimensionUnitException("null");
         }
 
         unit = unit.trim().toUpperCase();
         if (!SUPPORTED_UNIT.equals(unit)) {
-            throw new ShipmentValidationException(
-                    "UNSUPPORTED_DIMENSION_UNIT",
-                    "Unsupported dimension unit. Only CM is supported"
-            );
+            throw new UnsupportedDimensionUnitException(unit);
         }
 
         length = normalize(length);

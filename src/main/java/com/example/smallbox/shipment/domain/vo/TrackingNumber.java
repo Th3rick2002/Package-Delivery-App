@@ -1,6 +1,7 @@
 package com.example.smallbox.shipment.domain.vo;
 
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.InvalidTrackingNumberException;
+import com.example.smallbox.shipment.domain.exception.InvalidTrackingPrefixException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,10 +16,7 @@ public record TrackingNumber(String value) {
 
     public TrackingNumber {
         if (value == null || !VALIDATION_PATTERN.matcher(value).matches()) {
-            throw new ShipmentValidationException(
-                    "INVALID_TRACKING_NUMBER",
-                    "Invalid tracking number format. Expected format: XX-YYYYMMDD-HHMMSSmmmmmm"
-            );
+            throw new InvalidTrackingNumberException(value);
         }
     }
 
@@ -48,7 +46,7 @@ public record TrackingNumber(String value) {
 
     private static void validatePrefix(String prefix) {
         if (prefix == null || !prefix.matches("^[A-Za-z]{2,4}$")) {
-            throw new ShipmentValidationException("INVALID_TRACKING_PREFIX", "Prefix must be 2-4 letters");
+            throw new InvalidTrackingPrefixException(prefix);
         }
     }
 

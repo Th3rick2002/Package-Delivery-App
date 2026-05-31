@@ -6,7 +6,8 @@ import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
 import com.example.smallbox.shipment.domain.event.ShipmentStatusChangedEvent;
 import com.example.smallbox.shipment.domain.exception.InvalidShipmentStatusException;
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.PackageRequiredException;
+import com.example.smallbox.shipment.domain.exception.ShipmentFieldRequiredException;
 import com.example.smallbox.shipment.domain.vo.Price;
 import com.example.smallbox.shipment.domain.vo.TrackingNumber;
 
@@ -59,37 +60,37 @@ public class Shipment {
             LocalDateTime createdAt
     ) {
         if (trackingNumber == null) {
-            throw new ShipmentValidationException("TRACKING_NUMBER_REQUIRED", "Tracking number is required");
+            throw new ShipmentFieldRequiredException("TRACKING_NUMBER");
         }
         if (senderId == null) {
-            throw new ShipmentValidationException("SENDER_REQUIRED", "Sender ID is required");
+            throw new ShipmentFieldRequiredException("SENDER");
         }
         if (recipient == null) {
-            throw new ShipmentValidationException("RECIPIENT_REQUIRED", "Recipient is required");
+            throw new ShipmentFieldRequiredException("RECIPIENT");
         }
         if (destinationCityId == null) {
-            throw new ShipmentValidationException("DESTINATION_CITY_REQUIRED", "Destination city is required");
+            throw new ShipmentFieldRequiredException("DESTINATION_CITY");
         }
         if (exactAddress == null || exactAddress.isBlank()) {
-            throw new ShipmentValidationException("EXACT_ADDRESS_REQUIRED", "Exact address is required");
+            throw new ShipmentFieldRequiredException("EXACT_ADDRESS");
         }
         if (originBranchId == null) {
-            throw new ShipmentValidationException("ORIGIN_BRANCH_REQUIRED", "Origin branch is required");
+            throw new ShipmentFieldRequiredException("ORIGIN_BRANCH");
         }
         if (destinationBranchId == null) {
-            throw new ShipmentValidationException("DESTINATION_BRANCH_REQUIRED", "Destination branch is required");
+            throw new ShipmentFieldRequiredException("DESTINATION_BRANCH");
         }
         if (status == null) {
-            throw new ShipmentValidationException("SHIPMENT_STATUS_REQUIRED", "Status is required");
+            throw new ShipmentFieldRequiredException("SHIPMENT_STATUS");
         }
         if (packages == null || packages.isEmpty()) {
-            throw new ShipmentValidationException("PACKAGE_REQUIRED", "At least one package is required");
+            throw new PackageRequiredException();
         }
         if (totalPrice == null) {
-            throw new ShipmentValidationException("TOTAL_PRICE_REQUIRED", "Total price is required");
+            throw new ShipmentFieldRequiredException("TOTAL_PRICE");
         }
         if (createdAt == null) {
-            throw new ShipmentValidationException("CREATION_DATE_REQUIRED", "Creation date is required");
+            throw new ShipmentFieldRequiredException("CREATION_DATE");
         }
 
         this.shipmentId = shipmentId;
@@ -224,7 +225,7 @@ public class Shipment {
 
     private static Price calculateBasePrice(List<Package> packages) {
         if (packages == null || packages.isEmpty()) {
-            throw new ShipmentValidationException("PACKAGE_REQUIRED", "At least one package is required");
+            throw new PackageRequiredException();
         }
 
         BigDecimal amount = packages.stream()

@@ -1,23 +1,29 @@
 package com.example.smallbox.shipment.infrastructure.web;
 
-import com.example.smallbox.shared.application.dto.ApiErrorResponse;
 import com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal;
+import com.example.smallbox.shared.application.dto.ApiErrorResponse;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.application.CreateShipmentUseCase;
 import com.example.smallbox.shipment.application.GetShipmentHistoryUseCase;
+import com.example.smallbox.shipment.application.GetShipmentUseCase;
 import com.example.smallbox.shipment.application.UpdateShipmentStatusUseCase;
 import com.example.smallbox.shipment.application.dto.CreateShipmentRequest;
 import com.example.smallbox.shipment.application.dto.ShipmentHistoryResponse;
 import com.example.smallbox.shipment.application.dto.ShipmentResponse;
+import com.example.smallbox.shipment.application.dto.UpdateShipmentStatusRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.example.smallbox.shipment.application.dto.UpdateShipmentStatusRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,6 +47,7 @@ public class ShipmentController {
     private final CreateShipmentUseCase createShipmentUseCase;
     private final UpdateShipmentStatusUseCase updateShipmentStatusUseCase;
     private final GetShipmentHistoryUseCase getShipmentHistoryUseCase;
+    private final GetShipmentUseCase getShipmentUseCase;
 
     @Operation(
             summary = "Create a new shipment",
@@ -64,20 +71,90 @@ public class ShipmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{id}/status")
+    @Operation(
+            summary = "Get shipment details",
+            description = "Retrieves the current state and details of a shipment by its tracking number.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Shipment found",
+                            content = @Content(schema = @Schema(implementation = ShipmentResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Shipment not found",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @GetMapping("/{trackingNumber}")
+    @Cacheable(value = "shipments", key = "#trackingNumber")
+    public ResponseEntity<ShipmentResponse> getShipment(
+            @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
+            @PathVariable String trackingNumber
+    ) {
+        return ResponseEntity.ok(getShipmentUseCase.execute(trackingNumber));
+    }
+
+    @Operation(
+            summary = "Update shipment status",
+            description = "Updates the status of a shipment. Transitions must follow the defined state machine rules.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Status updated successfully"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid transition or status",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Shipment not found",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @PatchMapping("/{trackingNumber}/status")
+    @Caching(evict = {
+            @CacheEvict(value = "shipments", key = "#trackingNumber"),
+            @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
+    })
     public ResponseEntity<Void> updateStatus(
-            @PathVariable Long id,
+            @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
+            @PathVariable String trackingNumber,
             @Valid @RequestBody UpdateShipmentStatusRequest request,
             @AuthenticationPrincipal CustomUserPrincipal principal
     ) {
         UserId changedBy = new UserId(principal.getUserId());
-        updateShipmentStatusUseCase.execute(id, request.newStatus(), changedBy, request.comments());
+        updateShipmentStatusUseCase.execute(trackingNumber, request.newStatus(), changedBy, request.comments());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/history")
-    public ResponseEntity<List<ShipmentHistoryResponse>> getHistory(@PathVariable Long id) {
-        List<ShipmentHistoryResponse> response = getShipmentHistoryUseCase.execute(id).stream()
+    @Operation(
+            summary = "Get shipment history",
+            description = "Retrieves the full history of status changes for a shipment.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "History retrieved successfully",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ShipmentHistoryResponse.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Shipment not found",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @GetMapping("/{trackingNumber}/history")
+    @Cacheable(value = "shipment_histories", key = "#trackingNumber")
+    public ResponseEntity<List<ShipmentHistoryResponse>> getHistory(
+            @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
+            @PathVariable String trackingNumber
+    ) {
+        List<ShipmentHistoryResponse> response = getShipmentHistoryUseCase.execute(trackingNumber).stream()
                 .map(ShipmentHistoryResponse::from)
                 .toList();
         return ResponseEntity.ok(response);
