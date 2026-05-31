@@ -2,12 +2,14 @@ package com.example.smallbox.auth.infrastructure.security.filter;
 
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtService;
 import com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal;
+import com.example.smallbox.auth.infrastructure.security.service.TokenBlacklistVerifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final TokenBlacklistVerifier tokenBlacklistVerifier;
 
     @Override
     protected void doFilterInternal(
@@ -49,6 +52,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (tokenBlacklistVerifier.isTokenRevoked(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"error_code\": \"UNAUTHORIZED\", \"message\": \"Sesión inválida o cerrada previamente.\"}");
+            return;
+        }
+
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
@@ -64,6 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var authtoken = new UsernamePasswordAuthenticationToken(principal, null, authorities);
             authtoken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authtoken);
+            MDC.put("userId", authtoken.getName());
         }
 
         filterChain.doFilter(request, response);

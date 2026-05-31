@@ -2,6 +2,8 @@ package com.example.smallbox.shipment.domain;
 
 import com.example.smallbox.shared.domain.Email;
 import com.example.smallbox.shared.domain.Phone;
+import com.example.smallbox.shipment.domain.exception.InvalidRecipientNameException;
+import com.example.smallbox.shipment.domain.exception.RecipientFieldRequiredException;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -23,23 +25,25 @@ public record Recipient(
         lastName = validateName(lastName, "Last name", true);
         secondLastName = validateName(secondLastName, "Second last name", false);
 
-        if (phone == null) throw new IllegalArgumentException("Phone is required");
-        if (email == null) throw new IllegalArgumentException("Email is required");
+        if (phone == null) throw new RecipientFieldRequiredException("phone");
+        if (email == null) throw new RecipientFieldRequiredException("email");
     }
 
     private static String validateName(String name, String fieldName, boolean isRequired) {
         if (name == null || name.isBlank()) {
-            if (isRequired) throw new IllegalArgumentException(fieldName + " cannot be empty");
+            if (isRequired) {
+                throw new RecipientFieldRequiredException(fieldName);
+            }
             return null;
         }
 
         String cleanedName = name.trim();
 
         if (cleanedName.length() < 3)
-            throw new IllegalArgumentException(fieldName + " must be at least 3 characters");
+            throw new InvalidRecipientNameException(fieldName, "must be at least 3 characters");
 
         if (!NAME_PATTERN.matcher(cleanedName).matches())
-            throw new IllegalArgumentException(fieldName + " contains invalid characters");
+            throw new InvalidRecipientNameException(fieldName, "contains invalid characters");
 
         return cleanedName.toUpperCase();
     }
@@ -64,7 +68,9 @@ public record Recipient(
             Phone phone,
             Email email
     ) {
-        if (id == null) throw new IllegalArgumentException("ID is required for an existing recipient");
+        if (id == null) {
+            throw new RecipientFieldRequiredException("ID");
+        }
         return new Recipient(id, firstName, secondName, lastName, secondLastName, phone, email);
     }
 
