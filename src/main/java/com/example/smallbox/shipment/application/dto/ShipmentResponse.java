@@ -4,38 +4,83 @@ import com.example.smallbox.shipment.domain.Package;
 import com.example.smallbox.shipment.domain.Recipient;
 import com.example.smallbox.shipment.domain.Shipment;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "Shipment details response")
 public record ShipmentResponse(
+        @Schema(description = "Unique tracking number for the shipment", example = "SB-123456789")
         String trackingNumber,
+
+        @Schema(description = "Current status of the shipment", example = "PENDING")
         String status,
+
+        @Schema(description = "Total cost of the shipment", example = "25.50")
         BigDecimal totalPrice,
+
+        @Schema(description = "Currency of the price", example = "USD")
         String currency,
+
+        @Schema(description = "ID of the sender user")
         UUID senderId,
+
+        @Schema(description = "Recipient information")
         RecipientInfo recipient,
+
+        @Schema(description = "ID of the destination city")
         Integer destinationCityId,
+
+        @Schema(description = "Exact delivery address")
         String exactAddress,
+
+        @Schema(description = "ID of the origin branch")
         Integer originBranchId,
+
+        @Schema(description = "ID of the destination branch")
         Integer destinationBranchId,
+
+        @Schema(description = "List of packages in the shipment")
         List<PackageInfo> packages,
+
+        @Schema(description = "Timestamp when the shipment was created")
         LocalDateTime createdAt
 ) {
+    @Schema(description = "Recipient information")
     public record RecipientInfo(
+            @Schema(description = "Recipient's full name")
             String fullName,
+
+            @Schema(description = "Recipient's phone number")
             String phone,
+
+            @Schema(description = "Recipient's email")
             String email
     ) {}
 
+    @Schema(description = "Package details")
     public record PackageInfo(
+            @Schema(description = "Description of contents")
             String description,
+
+            @Schema(description = "Weight")
             BigDecimal weight,
+
+            @Schema(description = "Weight unit")
             String weightUnit,
+
+            @Schema(description = "Length")
             BigDecimal length,
+
+            @Schema(description = "Width")
             BigDecimal width,
+
+            @Schema(description = "Height")
             BigDecimal height,
+
+            @Schema(description = "Dimensions unit")
             String dimensionsUnit
     ) {}
 

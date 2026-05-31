@@ -4,6 +4,13 @@ import com.example.smallbox.auth.application.AuthService;
 import com.example.smallbox.auth.application.RefreshTokenService;
 import com.example.smallbox.auth.application.dto.LoginRequest;
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtTokenDTO;
+import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +31,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Authentication", description = "Endpoints for user authentication and session management")
 public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
@@ -40,6 +48,24 @@ public class AuthController {
 
     private static final String BLACKLIST_PREFIX = "jwt:blacklist:";
 
+    @Operation(
+            summary = "Login to the system",
+            description = "Authenticates a user and sets 'accessToken' and 'refreshToken' cookies.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Login successful",
+                            headers = {
+                                    @Header(name = "Set-Cookie", description = "Access and Refresh tokens")
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid credentials",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest request,
@@ -57,6 +83,24 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "Refresh access token",
+            description = "Uses the 'refreshToken' cookie to issue a new set of tokens.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Tokens rotated successfully",
+                            headers = {
+                                    @Header(name = "Set-Cookie", description = "New Access and Refresh tokens")
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid or missing refresh token",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
@@ -78,6 +122,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "Logout from the system",
+            description = "Revokes the session and clears authentication cookies.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Logout successful")
+            }
+    )
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
