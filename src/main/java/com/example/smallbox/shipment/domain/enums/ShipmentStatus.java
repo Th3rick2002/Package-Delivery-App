@@ -1,5 +1,7 @@
 package com.example.smallbox.shipment.domain.enums;
 
+import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+
 public enum ShipmentStatus {
     CREATED(1),
     RECEIVED_ORIGIN(2),
@@ -20,7 +22,7 @@ public enum ShipmentStatus {
 
     public static ShipmentStatus fromDatabaseId(Integer databaseId) {
         if (databaseId == null) {
-            throw new IllegalArgumentException("Shipment status id is required");
+            throw new ShipmentValidationException("SHIPMENT_STATUS_REQUIRED", "Shipment status id is required");
         }
 
         for (ShipmentStatus status : values()) {
@@ -29,6 +31,9 @@ public enum ShipmentStatus {
             }
         }
 
-        throw new IllegalArgumentException("Unknown shipment status id " + databaseId);
+        throw new ShipmentValidationException(
+                "UNKNOWN_SHIPMENT_STATUS",
+                "Unknown shipment status id " + databaseId
+        );
     }
 }

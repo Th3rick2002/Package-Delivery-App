@@ -7,4 +7,8 @@ public class InvalidShipmentStatusException extends UnprocessableEntityException
     public InvalidShipmentStatusException(ShipmentStatus status) {
         super("INVALID_SHIPMENT_STATUS", "Action not allowed for shipment in status " + status);
     }
+
+    public InvalidShipmentStatusException(ShipmentStatus from, ShipmentStatus to) {
+        super("INVALID_SHIPMENT_STATUS", "Cannot transition shipment from " + from + " to " + to);
+    }
 }

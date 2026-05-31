@@ -1,26 +1,41 @@
 package com.example.smallbox.shipment.domain.vo;
 
+import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public record Dimensions(BigDecimal length, BigDecimal width, BigDecimal height, String unit) {
+    private static final String SUPPORTED_UNIT = "CM";
+
     public Dimensions {
         if (length == null || width == null || height == null) {
-            throw new IllegalArgumentException("Dimensions are required");
+            throw new ShipmentValidationException("DIMENSIONS_REQUIRED", "Dimensions are required");
         }
-        if (length.compareTo(BigDecimal.ZERO) <= 0
-                || width.compareTo(BigDecimal.ZERO) <= 0
-                || height.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Dimensions must be greater than zero");
+        if (length.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ShipmentValidationException("INVALID_DIMENSION_LENGTH", "Length must be greater than zero");
+        }
+        if (width.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ShipmentValidationException("INVALID_DIMENSION_WIDTH", "Width must be greater than zero");
+        }
+        if (height.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ShipmentValidationException("INVALID_DIMENSION_HEIGHT", "Height must be greater than zero");
         }
         if (unit == null || unit.isBlank()) {
-            throw new IllegalArgumentException("Unit is required");
+            throw new ShipmentValidationException("DIMENSION_UNIT_REQUIRED", "Dimension unit is required");
+        }
+
+        unit = unit.trim().toUpperCase();
+        if (!SUPPORTED_UNIT.equals(unit)) {
+            throw new ShipmentValidationException(
+                    "UNSUPPORTED_DIMENSION_UNIT",
+                    "Unsupported dimension unit. Only CM is supported"
+            );
         }
 
         length = normalize(length);
         width = normalize(width);
         height = normalize(height);
-        unit = unit.trim().toUpperCase();
     }
 
     public static Dimensions ofCm(BigDecimal length, BigDecimal width, BigDecimal height) {
