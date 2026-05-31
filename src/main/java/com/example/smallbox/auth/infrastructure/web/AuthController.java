@@ -4,16 +4,20 @@ import com.example.smallbox.auth.application.AuthService;
 import com.example.smallbox.auth.application.RefreshTokenService;
 import com.example.smallbox.auth.application.dto.LoginRequest;
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtTokenDTO;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -23,6 +27,7 @@ import java.util.Map;
 public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${jwt.cookie.secure:false}")
     private boolean secureCookie;
@@ -32,6 +37,8 @@ public class AuthController {
 
     @Value("${jwt.expiration-time-refresh-ms}")
     private long refreshTokenMs;
+
+    private static final String BLACKLIST_PREFIX = "jwt:blacklist:";
 
     @PostMapping("/login")
     public ResponseEntity<?> login(
@@ -74,11 +81,36 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletRequest httpRequest,
             HttpServletResponse response
     ) {
         if (refreshToken != null) {
             refreshTokenService.logout(refreshToken);
         }
+
+        String accessToken = null;
+        if (httpRequest.getCookies() != null) {
+            accessToken = Arrays.stream(httpRequest.getCookies())
+                    .filter(cookie -> "accessToken".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (accessToken != null && !accessToken.isBlank()) {
+            long remainingTimeMs = accessTokenMs;
+
+            if (remainingTimeMs > 0) {
+                redisTemplate.opsForValue().set(
+                        BLACKLIST_PREFIX + accessToken,
+                        "revoked",
+                        Duration.ofMillis(remainingTimeMs)
+                );
+                log.info("Token de acceso ingresado a la Lista Negra perimetral en Redis de forma exitosa.");
+            }
+        }
+
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
         
         clearTokenCookie("accessToken", "/", response);
         clearTokenCookie("refreshToken", "/api/v1/auth/refresh", response);

@@ -3,6 +3,7 @@ package com.example.smallbox.config;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,7 +19,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 
 @Configuration
-@EnableCaching
+@EnableCaching(order = Ordered.LOWEST_PRECEDENCE)
 public class RedisConfig {
 
     @Bean
