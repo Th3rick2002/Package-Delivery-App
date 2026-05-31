@@ -34,19 +34,25 @@ public class BranchService {
                 .toList();
     }
 
+    @Cacheable(value = "branches", key = "#id")
     public BranchResponse getById(Integer id) {
         return branchRepository.findById(id)
                 .map(this::mapToResponse)
                 .orElseThrow(() -> new BranchNotFoundException(id));
     }
 
+    @Cacheable(value = "branches", key = "#locationId")
     public BranchResponse getByLocationId(Integer locationId) {
         return branchRepository.findByLocationId(locationId)
                 .map(this::mapToResponse)
                 .orElseThrow(() -> new LocationNotFoundException(locationId));
     }
 
-    @CacheEvict(value = "branches", key = "'all'")
+    @Caching(evict = {
+            @CacheEvict(value = "branches", key = "'all'"),
+            @CacheEvict(value = "branches", key = "#request.departmentId"),
+            @CacheEvict(value = "branches", allEntries = true)
+    })
     public BranchResponse create(CreateBranchRequest request) {
         LocationId locationId = new LocationId(request.departmentId());
         locationRepository.findById(locationId)
@@ -62,7 +68,8 @@ public class BranchService {
 
     @Caching(evict = {
             @CacheEvict(value = "branches", key = "'all'"),
-            @CacheEvict(value = "branches", key = "#id")
+            @CacheEvict(value = "branches", key = "#id"),
+            @CacheEvict(value = "branches", allEntries = true)
     })
     public BranchResponse update(Integer id, UpdateBranchRequest request) {
         Branch branch = branchRepository.findById(id)
@@ -84,7 +91,11 @@ public class BranchService {
         return mapToResponse(branch);
     }
 
-    @CacheEvict(value = "branches", key = "'all'")
+    @Caching(evict = {
+            @CacheEvict(value = "branches", key = "'all'"),
+            @CacheEvict(value = "branches", key = "#id"),
+            @CacheEvict(value = "branches", allEntries = true),
+    })
     public void delete(Integer id) {
         if (!branchRepository.existsById(id)) {
             throw new BranchNotFoundException(id);

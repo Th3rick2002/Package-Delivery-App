@@ -14,6 +14,8 @@ import com.example.smallbox.user.domain.User;
 import com.example.smallbox.user.domain.UserRepository;
 import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class BranchUserService {
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
 
+    @CacheEvict(value = "branchUsers", key = "#branchId")
     @Transactional
     public BranchUserResponse assignUser(Integer branchId, AssignUserRequest request) {
         Branch branch = branchRepository.findById(branchId)
@@ -51,6 +54,7 @@ public class BranchUserService {
         return mapToResponse(branchUserRepository.save(branchUser));
     }
 
+    @CacheEvict(value = "branchUsers", key = "#branchId")
     @Transactional
     public BranchUserResponse updateStatus(Integer branchId, UUID userId, UpdateBranchUserStatusRequest request) {
         BranchUser branchUser = branchUserRepository.findById(new BranchID(branchId), new UserId(userId))
@@ -60,6 +64,7 @@ public class BranchUserService {
         return mapToResponse(branchUserRepository.save(branchUser));
     }
 
+    @Cacheable(value = "branchUsers", key = "#branchId")
     public List<BranchUserResponse> listUsersByBranch(Integer branchId) {
         if (!branchRepository.existsById(branchId)) {
             throw new BranchNotFoundException(branchId);

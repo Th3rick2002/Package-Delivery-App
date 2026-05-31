@@ -14,6 +14,9 @@ import com.example.smallbox.user.domain.exceptions.EmailAlreadyInUseException;
 import com.example.smallbox.user.domain.exceptions.RoleNotFoundException;
 import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,11 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "'all'"),
+            @CacheEvict(value = "users", key = "#request.email"),
+            @CacheEvict(value = "users_auth", key = "#request.email")
+    })
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         Email email = new Email(request.email());
@@ -53,6 +61,7 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
+    @Cacheable(value = "users", key = "#id")
     @Transactional(readOnly = true)
     public UserResponse getUserById(UUID id) {
         return userRepository.findById(new UserId(id))
@@ -60,6 +69,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
     }
 
+    @Cacheable(value = "users", key = "'all'")
     @Transactional(readOnly = true)
     public List<UserResponse> listUsers() {
         return userRepository.findAll().stream()
@@ -67,11 +77,17 @@ public class UserService {
                 .toList();
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "'all'"),
+            @CacheEvict(value = "users", key = "#id"),
+            @CacheEvict(value = "users_auth", key = "#id")
+    })
     @Transactional
     public void deleteUser(UUID id) {
         userRepository.delete(new UserId(id));
     }
 
+    @Cacheable(value = "users_auth", key = "#email")
     @Transactional(readOnly = true)
     public UserAuthData getUserAuthByEmail(String email) {
         return userRepository.findByEmail(new Email(email))
