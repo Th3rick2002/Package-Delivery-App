@@ -5,6 +5,7 @@ import com.example.smallbox.user.application.dto.CreateUserRequest;
 import com.example.smallbox.user.application.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Slf4j
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
