@@ -1,6 +1,8 @@
 package com.example.smallbox.shipment.domain.vo;
 
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.InvalidWeightException;
+import com.example.smallbox.shipment.domain.exception.UnsupportedWeightUnitException;
+import com.example.smallbox.shipment.domain.exception.WeightRequiredException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,21 +12,18 @@ public record Weight(BigDecimal value, String unit) {
 
     public Weight {
         if (value == null) {
-            throw new ShipmentValidationException("WEIGHT_REQUIRED", "Weight is required");
+            throw new WeightRequiredException();
         }
         if (value.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ShipmentValidationException("INVALID_WEIGHT", "Weight must be greater than zero");
+            throw new InvalidWeightException();
         }
         if (unit == null || unit.isBlank()) {
-            throw new ShipmentValidationException("WEIGHT_UNIT_REQUIRED", "Weight unit is required");
+            throw new UnsupportedWeightUnitException("null");
         }
 
         unit = unit.trim().toUpperCase();
         if (!SUPPORTED_UNIT.equals(unit)) {
-            throw new ShipmentValidationException(
-                    "UNSUPPORTED_WEIGHT_UNIT",
-                    "Unsupported weight unit. Only KG is supported"
-            );
+            throw new UnsupportedWeightUnitException(unit);
         }
 
         value = value.setScale(2, RoundingMode.HALF_UP);

@@ -1,6 +1,8 @@
 package com.example.smallbox.shipment.domain;
 
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.DimensionsRequiredException;
+import com.example.smallbox.shipment.domain.exception.InvalidPackageDescriptionException;
+import com.example.smallbox.shipment.domain.exception.WeightRequiredException;
 import com.example.smallbox.shipment.domain.vo.Dimensions;
 import com.example.smallbox.shipment.domain.vo.Weight;
 
@@ -20,13 +22,13 @@ public record Package(
 
     public Package {
         if (description == null || description.isBlank()) {
-            throw new ShipmentValidationException("PACKAGE_DESCRIPTION_REQUIRED", "Description is required");
+            throw new InvalidPackageDescriptionException();
         }
         if (weight == null) {
-            throw new ShipmentValidationException("PACKAGE_WEIGHT_REQUIRED", "Weight is required");
+            throw new WeightRequiredException();
         }
         if (dimensions == null) {
-            throw new ShipmentValidationException("PACKAGE_DIMENSIONS_REQUIRED", "Dimensions are required");
+            throw new DimensionsRequiredException();
         }
     }
 

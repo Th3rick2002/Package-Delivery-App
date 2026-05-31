@@ -6,7 +6,13 @@ import com.example.smallbox.shared.domain.LocationId;
 import com.example.smallbox.shared.domain.Phone;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
-import com.example.smallbox.shipment.domain.exception.ShipmentValidationException;
+import com.example.smallbox.shipment.domain.exception.DimensionsRequiredException;
+import com.example.smallbox.shipment.domain.exception.InvalidDimensionValueException;
+import com.example.smallbox.shipment.domain.exception.InvalidPackageDescriptionException;
+import com.example.smallbox.shipment.domain.exception.InvalidWeightException;
+import com.example.smallbox.shipment.domain.exception.ShipmentFieldRequiredException;
+import com.example.smallbox.shipment.domain.exception.UnsupportedDimensionUnitException;
+import com.example.smallbox.shipment.domain.exception.UnsupportedWeightUnitException;
 import com.example.smallbox.shipment.domain.vo.Dimensions;
 import com.example.smallbox.shipment.domain.vo.Weight;
 import org.junit.jupiter.api.Test;
@@ -54,8 +60,8 @@ class ShipmentTest {
 
     @Test
     void weightRejectsUnsupportedUnitsWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        UnsupportedWeightUnitException exception = assertThrows(
+                UnsupportedWeightUnitException.class,
                 () -> new Weight(new BigDecimal("1.00"), "lb")
         );
 
@@ -64,8 +70,8 @@ class ShipmentTest {
 
     @Test
     void dimensionsRejectUnsupportedUnitsWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        UnsupportedDimensionUnitException exception = assertThrows(
+                UnsupportedDimensionUnitException.class,
                 () -> new Dimensions(
                         new BigDecimal("10.00"),
                         new BigDecimal("10.00"),
@@ -93,8 +99,8 @@ class ShipmentTest {
 
     @Test
     void weightRejectsZeroWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        InvalidWeightException exception = assertThrows(
+                InvalidWeightException.class,
                 () -> Weight.ofKg(BigDecimal.ZERO)
         );
 
@@ -103,8 +109,8 @@ class ShipmentTest {
 
     @Test
     void dimensionsRejectInvalidLengthWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        InvalidDimensionValueException exception = assertThrows(
+                InvalidDimensionValueException.class,
                 () -> Dimensions.ofCm(BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.ONE)
         );
 
@@ -113,8 +119,8 @@ class ShipmentTest {
 
     @Test
     void packageRejectsBlankDescriptionWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        InvalidPackageDescriptionException exception = assertThrows(
+                InvalidPackageDescriptionException.class,
                 () -> Package.create(
                         " ",
                         Weight.ofKg(new BigDecimal("1.00")),
@@ -127,8 +133,8 @@ class ShipmentTest {
 
     @Test
     void shipmentRejectsBlankAddressWithSemanticCode() {
-        ShipmentValidationException exception = assertThrows(
-                ShipmentValidationException.class,
+        ShipmentFieldRequiredException exception = assertThrows(
+                ShipmentFieldRequiredException.class,
                 () -> Shipment.create(
                         UserId.generate(),
                         validRecipient(),

@@ -24,6 +24,17 @@ Implementación técnica y detalles de frameworks.
 - **Web:** Controladores REST (Adaptadores de Entrada) que reciben peticiones y llaman a los servicios de aplicación.
 - **Security/Config:** Configuraciones técnicas específicas de Spring u otras librerías.
 
+## Documentación de la API
+
+El proyecto utiliza **OpenAPI 3** para la documentación de los endpoints.
+
+- **Annotations:** Se utilizan anotaciones de `io.swagger.v3.oas.annotations` en los controladores (`@Tag`, `@Operation`, `@ApiResponse`) y DTOs (`@Schema`) para enriquecer la especificación.
+- **Scalar:** Se ha integrado **Scalar** como interfaz principal para explorar la API, ofreciendo una experiencia más moderna y funcional que Swagger UI.
+- **Acceso:**
+    - Scalar: `/scalar-ui.html`
+    - Swagger UI: `/swagger-ui/index.html`
+    - JSON Spec: `/v3/api-docs`
+
 ## Reglas de Dependencia
 1. **Dominio** no conoce a nadie.
 2. **Aplicación** conoce al Dominio.
