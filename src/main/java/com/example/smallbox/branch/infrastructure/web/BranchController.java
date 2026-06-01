@@ -5,6 +5,7 @@ import com.example.smallbox.branch.application.dto.BranchResponse;
 import com.example.smallbox.branch.application.dto.CreateBranchRequest;
 import com.example.smallbox.branch.application.dto.UpdateBranchRequest;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,14 +34,17 @@ public class BranchController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "List of all branches",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BranchResponse.class)))
+                            description = "Paginated list of branches",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     )
             }
     )
     @GetMapping
-    public ResponseEntity<List<BranchResponse>> getAll() {
-        return ResponseEntity.ok(branchService.findAll());
+    public ResponseEntity<PaginatedResponse<BranchResponse>> getAll(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(branchService.findAll(limit, offset));
     }
 
     @Operation(

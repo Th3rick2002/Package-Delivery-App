@@ -8,6 +8,8 @@ import com.example.smallbox.branch.domain.BranchUser;
 import com.example.smallbox.branch.domain.exception.*;
 import com.example.smallbox.branch.domain.port.BranchRepository;
 import com.example.smallbox.branch.domain.port.BranchUserRepository;
+import com.example.smallbox.shared.application.dto.PaginatedMeta;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.shared.domain.BranchID;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.user.domain.User;
@@ -16,6 +18,9 @@ import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,15 +69,36 @@ public class BranchUserService {
         return mapToResponse(branchUserRepository.save(branchUser));
     }
 
-    @Cacheable(value = "branchUsers", key = "#branchId")
-    public List<BranchUserResponse> listUsersByBranch(Integer branchId) {
+    @Cacheable(value = "branchUsers", key = "#branchId + #limit + #offset")
+    public PaginatedResponse<BranchUserResponse> listUsersByBranch(Integer branchId, Integer limit, Integer offset) {
         if (!branchRepository.existsById(branchId)) {
             throw new BranchNotFoundException(branchId);
         }
 
-        return branchUserRepository.findByBranchId(new BranchID(branchId)).stream()
+        int finalOffset = (offset == null) ? 0 : Math.max(0, offset);
+        int finalLimit = (limit == null) ? 20 : limit;
+        finalLimit = Math.max(1, Math.min(100, finalLimit));
+
+        int pageNumber = finalOffset / finalLimit;
+        Pageable pageable = PageRequest.of(pageNumber, finalLimit);
+
+        Page<BranchUser> page = branchUserRepository.findByBranchId(new BranchID(branchId), pageable);
+
+        List<BranchUserResponse> data = page.getContent().stream()
                 .map(this::mapToResponse)
                 .toList();
+
+        PaginatedMeta meta = PaginatedMeta.builder()
+                .offset(finalOffset)
+                .limit(finalLimit)
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+
+        return PaginatedResponse.<BranchUserResponse>builder()
+                .data(data)
+                .meta(meta)
+                .build();
     }
 
     private void validateRole(String roleName) {

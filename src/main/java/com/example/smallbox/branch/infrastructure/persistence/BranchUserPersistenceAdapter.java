@@ -7,6 +7,8 @@ import com.example.smallbox.branch.infrastructure.persistence.mapper.BranchUserM
 import com.example.smallbox.shared.domain.BranchID;
 import com.example.smallbox.shared.domain.UserId;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,10 +33,9 @@ public class BranchUserPersistenceAdapter implements BranchUserRepository {
     }
 
     @Override
-    public List<BranchUser> findByBranchId(BranchID branchId) {
-        return jpaBranchUserRepository.findByBranchId(branchId.id()).stream()
-                .map(BranchUserMapper::toDomain)
-                .toList();
+    public Page<BranchUser> findByBranchId(BranchID branchId, Pageable pageable) {
+        return jpaBranchUserRepository.findByBranchId(branchId.id(), pageable)
+                .map(BranchUserMapper::toDomain);
     }
 
     @Override

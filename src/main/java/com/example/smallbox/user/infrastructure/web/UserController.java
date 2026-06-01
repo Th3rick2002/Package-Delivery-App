@@ -1,10 +1,12 @@
 package com.example.smallbox.user.infrastructure.web;
 
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.user.application.UserService;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
 import com.example.smallbox.user.application.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,8 +54,12 @@ public class UserController {
     )
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody CreateUserRequest request,
+            @Parameter(hidden = true) java.security.Principal principal
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUser(request, principal.getName()));
     }
 
     @Operation(
@@ -82,15 +88,18 @@ public class UserController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "List of users",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))
+                            description = "Paginated list of users",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     )
             }
     )
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<List<UserResponse>> listUsers() {
-        return ResponseEntity.ok(userService.listUsers());
+    public ResponseEntity<PaginatedResponse<UserResponse>> listUsers(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(userService.listUsers(limit, offset));
     }
 
     @Operation(

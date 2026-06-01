@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -113,10 +115,11 @@ class ShipmentControllerTest {
     @Test
     @WithMockUser
     void getHistory_ShouldReturnHistoryList() throws Exception {
-        when(getShipmentHistoryUseCase.execute(trackingNumber)).thenReturn(List.of());
+        when(getShipmentHistoryUseCase.execute(eq(trackingNumber), any(Pageable.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/shipments/{trackingNumber}/history", trackingNumber))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.meta").exists());
     }
 }
