@@ -26,6 +26,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -66,6 +67,7 @@ public class ShipmentController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     public ResponseEntity<ShipmentResponse> createShipment(@Valid @RequestBody CreateShipmentRequest request) {
         ShipmentResponse response = createShipmentUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -88,6 +90,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}")
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Cacheable(value = "shipments", key = "#trackingNumber")
     public ResponseEntity<ShipmentResponse> getShipment(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
@@ -117,6 +120,7 @@ public class ShipmentController {
             }
     )
     @PatchMapping("/{trackingNumber}/status")
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Caching(evict = {
             @CacheEvict(value = "shipments", key = "#trackingNumber"),
             @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
@@ -149,6 +153,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}/history")
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Cacheable(value = "shipment_histories", key = "#trackingNumber")
     public ResponseEntity<List<ShipmentHistoryResponse>> getHistory(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")

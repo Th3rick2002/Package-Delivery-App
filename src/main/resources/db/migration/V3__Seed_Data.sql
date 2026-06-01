@@ -1,9 +1,9 @@
 -- Seed de Roles
-INSERT INTO roles (role_name) VALUES 
-('SUPER_ADMIN'),
-('BRANCH_ADMIN'),
-('EMPLOYEE'),
-('CLIENT');
+INSERT INTO roles (role_name) VALUES
+('ROLE_SUPER_ADMIN'),
+('ROLE_BRANCH_ADMIN'),
+('ROLE_EMPLOYEE'),
+('ROLE_CLIENT');
 
 -- Seed de Status de Envío
 INSERT INTO shipment_status (status_id, status_name, description) VALUES
@@ -107,12 +107,12 @@ CROSS JOIN (SELECT country_id FROM countries WHERE iso_code = 'HN') AS c;
 -- hash generado: $2a$10$a1TIpYdh1zkDXx75k5wzY.SI8VIXt0bGjNkdyXbfFKGy59csvMe6C
 INSERT INTO users (role_id, firstName, lastname, phone, email, hash_password)
 SELECT role_id, 'Super', 'Admin', '00000000', 'admin@smallbox.com', '$2a$10$a1TIpYdh1zkDXx75k5wzY.SI8VIXt0bGjNkdyXbfFKGy59csvMe6C'
-FROM roles WHERE role_name = 'SUPER_ADMIN';
+FROM roles WHERE role_name = 'ROLE_SUPER_ADMIN';
 
 INSERT INTO users (role_id, firstName, lastname, phone, email, hash_password)
 SELECT role_id, 'Branch', 'Admin', '00000000', 'manager@smallbox.com', '$2a$10$a1TIpYdh1zkDXx75k5wzY.SI8VIXt0bGjNkdyXbfFKGy59csvMe6C'
-FROM roles WHERE role_name = 'BRANCH_ADMIN';
+FROM roles WHERE role_name = 'ROLE_BRANCH_ADMIN';
 
 INSERT INTO users (role_id, firstName, lastname, phone, email, hash_password)
 SELECT role_id, 'Branch', 'employee', '00000000', 'employee@smallbox.com', '$2a$10$a1TIpYdh1zkDXx75k5wzY.SI8VIXt0bGjNkdyXbfFKGy59csvMe6C'
-FROM roles WHERE role_name = 'EMPLOYEE';
+FROM roles WHERE role_name = 'ROLE_EMPLOYEE';

@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -99,6 +100,7 @@ public class BranchController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<BranchResponse> create(@Valid @RequestBody CreateBranchRequest request) {
         return ResponseEntity.ok(branchService.create(request));
     }
@@ -119,6 +121,7 @@ public class BranchController {
             }
     )
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<BranchResponse> update(@PathVariable Integer id, @Valid @RequestBody UpdateBranchRequest request) {
         return ResponseEntity.ok(branchService.update(id, request));
     }
@@ -135,6 +138,7 @@ public class BranchController {
             }
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         branchService.delete(id);
         return ResponseEntity.noContent().build();

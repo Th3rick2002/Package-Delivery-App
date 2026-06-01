@@ -3,6 +3,7 @@ package com.example.smallbox.user.application;
 import com.example.smallbox.shared.domain.Email;
 import com.example.smallbox.shared.domain.Phone;
 import com.example.smallbox.shared.domain.UserId;
+import com.example.smallbox.user.application.dto.CreateClientRequest;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
 import com.example.smallbox.user.application.dto.UserAuthData;
 import com.example.smallbox.user.application.dto.UserResponse;
@@ -59,6 +60,34 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return mapToResponse(savedUser);
+    }
+
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "'all'"),
+            @CacheEvict(value = "users", key = "#request.email"),
+            @CacheEvict(value = "users_auth", key = "#request.email")
+    })
+    @Transactional
+    public void registerClient(CreateClientRequest request) {
+        Email email = new Email(request.email());
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyInUseException(request.email());
+        }
+
+        Role role = new Role(4, "ROLE_CLIENT");
+
+        User user = User.create(
+                role,
+                request.firstName(),
+                request.secondName(),
+                request.lastName(),
+                request.secondLastName(),
+                new Phone(request.phone()),
+                email,
+                passwordEncoder.encode(request.password())
+        );
+
+        userRepository.save(user);
     }
 
     @Cacheable(value = "users", key = "#id")

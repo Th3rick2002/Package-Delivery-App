@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class BranchUserController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<BranchUserResponse> assignUser(
             @PathVariable Integer branchId,
             @Valid @RequestBody AssignUserRequest request) {
@@ -73,6 +75,7 @@ public class BranchUserController {
             }
     )
     @PatchMapping("/{userId}/status")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<BranchUserResponse> updateStatus(
             @PathVariable Integer branchId,
             @PathVariable UUID userId,
@@ -91,6 +94,7 @@ public class BranchUserController {
             }
     )
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<List<BranchUserResponse>> listUsersByBranch(@PathVariable Integer branchId) {
         return ResponseEntity.ok(branchUserService.listUsersByBranch(branchId));
     }
