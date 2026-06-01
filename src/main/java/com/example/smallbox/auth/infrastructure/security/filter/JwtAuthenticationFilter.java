@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
@@ -69,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String role = jwtService.getRoleFromToken(token);
         UUID userId = jwtService.getUserIdFromToken(token);
 
-        if (email != null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var authorities = List.of(new SimpleGrantedAuthority(role));
             var principal = new CustomUserPrincipal(userId, email, null, authorities);
             var authtoken = new UsernamePasswordAuthenticationToken(principal, null, authorities);

@@ -5,6 +5,7 @@ import com.example.smallbox.branch.application.dto.BranchResponse;
 import com.example.smallbox.branch.application.dto.CreateBranchRequest;
 import com.example.smallbox.branch.application.dto.UpdateBranchRequest;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,14 +34,17 @@ public class BranchController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "List of all branches",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BranchResponse.class)))
+                            description = "Paginated list of branches",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     )
             }
     )
     @GetMapping
-    public ResponseEntity<List<BranchResponse>> getAll() {
-        return ResponseEntity.ok(branchService.findAll());
+    public ResponseEntity<PaginatedResponse<BranchResponse>> getAll(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(branchService.findAll(limit, offset));
     }
 
     @Operation(
@@ -99,6 +104,7 @@ public class BranchController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<BranchResponse> create(@Valid @RequestBody CreateBranchRequest request) {
         return ResponseEntity.ok(branchService.create(request));
     }
@@ -119,6 +125,7 @@ public class BranchController {
             }
     )
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<BranchResponse> update(@PathVariable Integer id, @Valid @RequestBody UpdateBranchRequest request) {
         return ResponseEntity.ok(branchService.update(id, request));
     }
@@ -135,6 +142,7 @@ public class BranchController {
             }
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         branchService.delete(id);
         return ResponseEntity.noContent().build();

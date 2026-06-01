@@ -3,6 +3,9 @@ package com.example.smallbox.user.application;
 import com.example.smallbox.shared.domain.Email;
 import com.example.smallbox.shared.domain.Phone;
 import com.example.smallbox.shared.domain.UserId;
+import com.example.smallbox.shared.application.dto.PaginatedMeta;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
+import com.example.smallbox.user.application.dto.CreateClientRequest;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
 import com.example.smallbox.user.application.dto.UserAuthData;
 import com.example.smallbox.user.application.dto.UserResponse;
@@ -17,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,17 +43,21 @@ public class UserService {
             @CacheEvict(value = "users_auth", key = "#request.email")
     })
     @Transactional
-    public UserResponse createUser(CreateUserRequest request) {
+    public UserResponse createUser(CreateUserRequest request, String creatorEmail) {
         Email email = new Email(request.email());
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyInUseException(request.email());
         }
 
-        Role role = roleRepository.findById(request.roleId())
+        User creator = userRepository.findByEmail(new Email(creatorEmail))
+                .orElseThrow(() -> new UserNotFoundException(creatorEmail));
+
+        Role targetRole = roleRepository.findById(request.roleId())
                 .orElseThrow(() -> new RoleNotFoundException(request.roleId()));
 
-        User user = User.create(
-                role,
+        User user = User.createEmployee(
+                creator.getRole(),
+                targetRole,
                 request.firstName(),
                 request.secondName(),
                 request.lastName(),
@@ -61,6 +71,35 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "'all'"),
+            @CacheEvict(value = "users", key = "#request.email"),
+            @CacheEvict(value = "users_auth", key = "#request.email")
+    })
+    @Transactional
+    public void registerClient(CreateClientRequest request) {
+        Email email = new Email(request.email());
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyInUseException(request.email());
+        }
+
+        Role role = roleRepository.findByName("ROLE_CLIENT")
+                .orElseThrow(() -> new RoleNotFoundException("ROLE_CLIENT"));
+
+        User user = User.createClient(
+                role,
+                request.firstName(),
+                request.secondName(),
+                request.lastName(),
+                request.secondLastName(),
+                new Phone(request.phone()),
+                email,
+                passwordEncoder.encode(request.password())
+        );
+
+        userRepository.save(user);
+    }
+
     @Cacheable(value = "users", key = "#id")
     @Transactional(readOnly = true)
     public UserResponse getUserById(UUID id) {
@@ -69,12 +108,33 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
     }
 
-    @Cacheable(value = "users", key = "'all'")
+    @Cacheable(value = "users", key = "'all' + #limit + #offset")
     @Transactional(readOnly = true)
-    public List<UserResponse> listUsers() {
-        return userRepository.findAll().stream()
+    public PaginatedResponse<UserResponse> listUsers(Integer limit, Integer offset) {
+        int finalOffset = (offset == null) ? 0 : Math.max(0, offset);
+        int finalLimit = (limit == null) ? 20 : limit;
+        finalLimit = Math.max(1, Math.min(100, finalLimit));
+
+        int pageNumber = finalOffset / finalLimit;
+        Pageable pageable = PageRequest.of(pageNumber, finalLimit);
+
+        Page<User> page = userRepository.findAll(pageable);
+
+        List<UserResponse> data = page.getContent().stream()
                 .map(this::mapToResponse)
                 .toList();
+
+        PaginatedMeta meta = PaginatedMeta.builder()
+                .offset(finalOffset)
+                .limit(finalLimit)
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+
+        return PaginatedResponse.<UserResponse>builder()
+                .data(data)
+                .meta(meta)
+                .build();
     }
 
     @Caching(evict = {

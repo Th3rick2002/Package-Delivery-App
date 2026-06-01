@@ -5,6 +5,7 @@ import com.example.smallbox.branch.application.dto.AssignUserRequest;
 import com.example.smallbox.branch.application.dto.BranchUserResponse;
 import com.example.smallbox.branch.application.dto.UpdateBranchUserStatusRequest;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +52,7 @@ public class BranchUserController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<BranchUserResponse> assignUser(
             @PathVariable Integer branchId,
             @Valid @RequestBody AssignUserRequest request) {
@@ -73,6 +76,7 @@ public class BranchUserController {
             }
     )
     @PatchMapping("/{userId}/status")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<BranchUserResponse> updateStatus(
             @PathVariable Integer branchId,
             @PathVariable UUID userId,
@@ -85,13 +89,18 @@ public class BranchUserController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "List of users assigned to the branch",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BranchUserResponse.class)))
+                            description = "Paginated list of users assigned to the branch",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     )
             }
     )
     @GetMapping
-    public ResponseEntity<List<BranchUserResponse>> listUsersByBranch(@PathVariable Integer branchId) {
-        return ResponseEntity.ok(branchUserService.listUsersByBranch(branchId));
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
+    public ResponseEntity<PaginatedResponse<BranchUserResponse>> listUsersByBranch(
+            @PathVariable Integer branchId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(branchUserService.listUsersByBranch(branchId, limit, offset));
     }
 }

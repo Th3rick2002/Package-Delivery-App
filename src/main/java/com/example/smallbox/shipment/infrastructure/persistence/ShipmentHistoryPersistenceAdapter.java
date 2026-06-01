@@ -5,6 +5,8 @@ import com.example.smallbox.shipment.domain.port.ShipmentHistoryRepository;
 import com.example.smallbox.shipment.infrastructure.persistence.entities.ShipmentHistoryJpaEntity;
 import com.example.smallbox.shipment.infrastructure.persistence.mapper.ShipmentHistoryMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +28,8 @@ public class ShipmentHistoryPersistenceAdapter implements ShipmentHistoryReposit
 
     @Override
     @Transactional(readOnly = true)
-    public List<ShipmentHistory> findByShipmentId(Long shipmentId) {
-        return jpaRepository.findByShipmentIdOrderByCreatedAtAsc(shipmentId).stream()
-                .map(ShipmentHistoryMapper::toDomain)
-                .toList();
+    public Page<ShipmentHistory> findByShipmentId(Long shipmentId, Pageable pageable) {
+        return jpaRepository.findByShipmentIdOrderByCreatedAtAsc(shipmentId, pageable)
+                .map(ShipmentHistoryMapper::toDomain);
     }
 }

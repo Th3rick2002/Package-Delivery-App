@@ -5,6 +5,8 @@ import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.user.domain.User;
 import com.example.smallbox.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,8 +34,9 @@ public class UserPersistenceAdapter implements UserRepository {
     }
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll().stream().map(UserMapper::toDomain).toList();
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(UserMapper::toDomain);
     }
 
     @Override

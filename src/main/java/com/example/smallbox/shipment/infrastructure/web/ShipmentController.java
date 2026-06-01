@@ -2,6 +2,8 @@ package com.example.smallbox.shipment.infrastructure.web;
 
 import com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedMeta;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.application.CreateShipmentUseCase;
 import com.example.smallbox.shipment.application.GetShipmentHistoryUseCase;
@@ -24,16 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -66,6 +66,7 @@ public class ShipmentController {
             }
     )
     @PostMapping
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     public ResponseEntity<ShipmentResponse> createShipment(@Valid @RequestBody CreateShipmentRequest request) {
         ShipmentResponse response = createShipmentUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -88,6 +89,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}")
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Cacheable(value = "shipments", key = "#trackingNumber")
     public ResponseEntity<ShipmentResponse> getShipment(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
@@ -117,6 +119,7 @@ public class ShipmentController {
             }
     )
     @PatchMapping("/{trackingNumber}/status")
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Caching(evict = {
             @CacheEvict(value = "shipments", key = "#trackingNumber"),
             @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
@@ -139,7 +142,7 @@ public class ShipmentController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "History retrieved successfully",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ShipmentHistoryResponse.class)))
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -149,14 +152,37 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}/history")
-    @Cacheable(value = "shipment_histories", key = "#trackingNumber")
-    public ResponseEntity<List<ShipmentHistoryResponse>> getHistory(
+    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @Cacheable(value = "shipment_histories", key = "#trackingNumber + #limit + #offset")
+    public ResponseEntity<PaginatedResponse<ShipmentHistoryResponse>> getHistory(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
-            @PathVariable String trackingNumber
+            @PathVariable String trackingNumber,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
     ) {
-        List<ShipmentHistoryResponse> response = getShipmentHistoryUseCase.execute(trackingNumber).stream()
+        int finalOffset = (offset == null) ? 0 : Math.max(0, offset);
+        int finalLimit = (limit == null) ? 20 : limit;
+        finalLimit = Math.max(1, Math.min(100, finalLimit));
+
+        int pageNumber = finalOffset / finalLimit;
+        Pageable pageable = PageRequest.of(pageNumber, finalLimit);
+
+        Page<com.example.smallbox.shipment.domain.ShipmentHistory> page = getShipmentHistoryUseCase.execute(trackingNumber, pageable);
+
+        List<ShipmentHistoryResponse> data = page.getContent().stream()
                 .map(ShipmentHistoryResponse::from)
                 .toList();
-        return ResponseEntity.ok(response);
+
+        PaginatedMeta meta = PaginatedMeta.builder()
+                .offset(finalOffset)
+                .limit(finalLimit)
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+
+        return ResponseEntity.ok(PaginatedResponse.<ShipmentHistoryResponse>builder()
+                .data(data)
+                .meta(meta)
+                .build());
     }
 }
