@@ -90,7 +90,6 @@ public class ShipmentController {
     )
     @GetMapping("/{trackingNumber}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
-    @Cacheable(value = "shipments", key = "#trackingNumber")
     public ResponseEntity<ShipmentResponse> getShipment(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
             @PathVariable String trackingNumber
@@ -120,10 +119,6 @@ public class ShipmentController {
     )
     @PatchMapping("/{trackingNumber}/status")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
-    @Caching(evict = {
-            @CacheEvict(value = "shipments", key = "#trackingNumber"),
-            @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
-    })
     public ResponseEntity<Void> updateStatus(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
             @PathVariable String trackingNumber,
@@ -153,36 +148,12 @@ public class ShipmentController {
     )
     @GetMapping("/{trackingNumber}/history")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
-    @Cacheable(value = "shipment_histories", key = "#trackingNumber + #limit + #offset")
     public ResponseEntity<PaginatedResponse<ShipmentHistoryResponse>> getHistory(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
             @PathVariable String trackingNumber,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "offset", required = false) Integer offset
     ) {
-        int finalOffset = (offset == null) ? 0 : Math.max(0, offset);
-        int finalLimit = (limit == null) ? 20 : limit;
-        finalLimit = Math.max(1, Math.min(100, finalLimit));
-
-        int pageNumber = finalOffset / finalLimit;
-        Pageable pageable = PageRequest.of(pageNumber, finalLimit);
-
-        Page<com.example.smallbox.shipment.domain.ShipmentHistory> page = getShipmentHistoryUseCase.execute(trackingNumber, pageable);
-
-        List<ShipmentHistoryResponse> data = page.getContent().stream()
-                .map(ShipmentHistoryResponse::from)
-                .toList();
-
-        PaginatedMeta meta = PaginatedMeta.builder()
-                .offset(finalOffset)
-                .limit(finalLimit)
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .build();
-
-        return ResponseEntity.ok(PaginatedResponse.<ShipmentHistoryResponse>builder()
-                .data(data)
-                .meta(meta)
-                .build());
+        return ResponseEntity.ok(getShipmentHistoryUseCase.execute(trackingNumber, limit, offset));
     }
 }

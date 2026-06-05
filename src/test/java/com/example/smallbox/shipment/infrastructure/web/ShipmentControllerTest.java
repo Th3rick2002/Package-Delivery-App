@@ -3,9 +3,12 @@ package com.example.smallbox.shipment.infrastructure.web;
 import com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.application.CreateShipmentUseCase;
+import com.example.smallbox.shared.application.dto.PaginatedMeta;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.shipment.application.GetShipmentHistoryUseCase;
 import com.example.smallbox.shipment.application.GetShipmentUseCase;
 import com.example.smallbox.shipment.application.UpdateShipmentStatusUseCase;
+import com.example.smallbox.shipment.application.dto.ShipmentHistoryResponse;
 import com.example.smallbox.shipment.application.dto.ShipmentResponse;
 import com.example.smallbox.shipment.application.dto.UpdateShipmentStatusRequest;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
@@ -14,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -115,7 +116,11 @@ class ShipmentControllerTest {
     @Test
     @WithMockUser
     void getHistory_ShouldReturnHistoryList() throws Exception {
-        when(getShipmentHistoryUseCase.execute(eq(trackingNumber), any(Pageable.class))).thenReturn(Page.empty());
+        when(getShipmentHistoryUseCase.execute(eq(trackingNumber), any(), any()))
+                .thenReturn(PaginatedResponse.<ShipmentHistoryResponse>builder()
+                        .data(List.of())
+                        .meta(PaginatedMeta.builder().build())
+                        .build());
 
         mockMvc.perform(get("/api/v1/shipments/{trackingNumber}/history", trackingNumber))
                 .andExpect(status().isOk())
