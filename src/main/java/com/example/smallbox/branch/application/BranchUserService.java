@@ -36,7 +36,7 @@ public class BranchUserService {
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
 
-    @CacheEvict(value = "branchUsers", key = "#branchId")
+    @CacheEvict(value =  {"branchUsers", "branchUserGlobal"}, allEntries = true)
     @Transactional
     public BranchUserResponse assignUser(AssignUserRequest request) {
         Branch branch = branchRepository.findById(request.branchId())
@@ -60,7 +60,7 @@ public class BranchUserService {
         return mapToResponse(branchUserRepository.save(branchUser));
     }
 
-    @CacheEvict(value = "branchUsers", key = "#branchId")
+    @CacheEvict(value = {"branchUsers", "branchUserGlobal"}, allEntries = true)
     @Transactional
     public BranchUserResponse updateStatus(UpdateBranchUserStatusRequest request) {
         BranchUser branchUser = branchUserRepository.findById(new BranchID(request.branchId()), new UserId(request.userId()))
