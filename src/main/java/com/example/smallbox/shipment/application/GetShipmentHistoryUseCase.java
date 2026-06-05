@@ -7,6 +7,8 @@ import com.example.smallbox.shipment.domain.port.ShipmentHistoryRepository;
 import com.example.smallbox.shipment.domain.port.ShipmentRepository;
 import com.example.smallbox.shipment.domain.vo.TrackingNumber;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +22,9 @@ public class GetShipmentHistoryUseCase {
     private final ShipmentHistoryRepository historyRepository;
 
     @Transactional(readOnly = true)
-    public List<ShipmentHistory> execute(String trackingNumber) {
+    public Page<ShipmentHistory> execute(String trackingNumber, Pageable pageable) {
         Shipment shipment = shipmentRepository.findByTrackingNumber(new TrackingNumber(trackingNumber))
                 .orElseThrow(() -> new ShipmentNotFoundException(trackingNumber));
-        return historyRepository.findByShipmentId(shipment.shipmentId());
+        return historyRepository.findByShipmentId(shipment.shipmentId(), pageable);
     }
 }

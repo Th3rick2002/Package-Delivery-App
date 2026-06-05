@@ -14,9 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -44,16 +46,16 @@ class ShipmentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private CreateShipmentUseCase createShipmentUseCase;
 
-    @MockBean
+    @MockitoBean
     private UpdateShipmentStatusUseCase updateShipmentStatusUseCase;
 
-    @MockBean
+    @MockitoBean
     private GetShipmentHistoryUseCase getShipmentHistoryUseCase;
 
-    @MockBean
+    @MockitoBean
     private GetShipmentUseCase getShipmentUseCase;
 
     private String trackingNumber = "SB-20260531-143000123456";
@@ -113,10 +115,11 @@ class ShipmentControllerTest {
     @Test
     @WithMockUser
     void getHistory_ShouldReturnHistoryList() throws Exception {
-        when(getShipmentHistoryUseCase.execute(trackingNumber)).thenReturn(List.of());
+        when(getShipmentHistoryUseCase.execute(eq(trackingNumber), any(Pageable.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/shipments/{trackingNumber}/history", trackingNumber))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.meta").exists());
     }
 }

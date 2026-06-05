@@ -40,6 +40,20 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateInternalToken(UUID userId, String email, Integer branchId, String role, JWTType type) {
+        long expiration = type == JWTType.ACCESS ? this.expirationTime : this.refreshTokenTime;
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role", role)
+                .claim("branchId", branchId)
+                .claim("userId", userId.toString())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key)
+                .compact();
+    }
+
     public String getEmailFromToken(String token) {
         return getClaims(token).getSubject();
     }
@@ -50,6 +64,10 @@ public class JwtService {
 
     public UUID getUserIdFromToken(String token) {
         return UUID.fromString(getClaims(token).get("userId", String.class));
+    }
+
+    public Integer getBranchIdFromToken(String token) {
+        return getClaims(token).get("branchId", Integer.class);
     }
 
     public boolean isValid(String token) {

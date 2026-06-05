@@ -5,7 +5,11 @@ import com.example.smallbox.branch.domain.port.BranchRepository;
 import com.example.smallbox.branch.infrastructure.persistence.entities.BranchEntity;
 import com.example.smallbox.branch.infrastructure.persistence.mapper.BranchMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+
 
 import java.util.List;
 import java.util.Optional;
@@ -34,10 +38,9 @@ public class BranchPersistenceAdapter implements BranchRepository {
     }
 
     @Override
-    public List<Branch> findAll() {
-        return jpaBranchRepository.findAll().stream()
-                .map(BranchMapper::toDomain)
-                .toList();
+    public Page<Branch> findAll(Pageable pageable) {
+        return jpaBranchRepository.findAll(pageable)
+                .map(BranchMapper::toDomain);
     }
 
     @Override

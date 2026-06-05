@@ -5,6 +5,8 @@ import com.example.smallbox.auth.application.RefreshTokenService;
 import com.example.smallbox.auth.application.dto.LoginRequest;
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtTokenDTO;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.user.application.UserService;
+import com.example.smallbox.user.application.dto.CreateClientRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +38,7 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final UserService userService;
 
     @Value("${jwt.cookie.secure:false}")
     private boolean secureCookie;
@@ -49,8 +52,8 @@ public class AuthController {
     private static final String BLACKLIST_PREFIX = "jwt:blacklist:";
 
     @Operation(
-            summary = "Login to the system",
-            description = "Authenticates a user and sets 'accessToken' and 'refreshToken' cookies.",
+            summary = "Login for clients",
+            description = "Authenticates a clients and sets 'accessToken' and 'refreshToken' cookies.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -80,6 +83,62 @@ public class AuthController {
         setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
         setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Login for staff",
+            description = "Authenticates a staff user and sets 'accessToken' and 'refreshToken' cookies.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Login successful",
+                            headers = {
+                                    @Header(name = "Set-Cookie", description = "Access and Refresh tokens")
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid credentials",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @PostMapping("/private/login")
+    public ResponseEntity<?> privateLogin(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response
+    ) {
+        String ip = extractIp(httpRequest);
+        String ua = httpRequest.getHeader("User-Agent");
+
+        JwtTokenDTO tokens = authService.loginAdministrative(request, ip, ua);
+
+        setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
+        setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Register a new client",
+            description = "Registers a new client with the system.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User found"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "Email already exist",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody CreateClientRequest request) {
+        userService.registerClient(request);
         return ResponseEntity.ok().build();
     }
 

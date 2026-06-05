@@ -55,20 +55,24 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | `LOCATION_NOT_FOUND`         | `NotFoundException`            | La ubicación (departamento) especificada no existe.              |
 | `BRANCH_INACTIVE`            | `UnprocessableEntityException` | La sucursal está inactiva o eliminada y no permite asignaciones. |
 | `BRANCH_USER_NOT_FOUND`      | `NotFoundException`            | El usuario no está asignado a la sucursal especificada.          |
+| `BRANCH_USER_NOT_ASSIGNED`   | `NotFoundException`            | El usuario no está asignado a ninguna sucursal.                  |
 | `BRANCH_USER_ALREADY_EXISTS` | `ConflictException`            | El usuario ya se encuentra asignado a la sucursal.               |
 | `INVALID_ROLE_FOR_BRANCH`    | `UnprocessableEntityException` | El rol del usuario no es apto para ser asignado a una sucursal.  |
+| `BRANCH_ASSIGNMENT_REVOKED`  | `UnauthorizedException`        | La asignación a la sucursal ha sido revocada o es inexistente.   |
 
 ### Módulo: Auth / User
-| Código (`code`)        | Base Exception          | Descripción                                                   |
-|:-----------------------|:------------------------|:--------------------------------------------------------------|
-| `USER_NOT_FOUND`       | `NotFoundException`     | El usuario solicitado no existe.                              |
-| `ROLE_NOT_FOUND`       | `NotFoundException`     | El rol solicitado no existe.                                  |
-| `EMAIL_ALREADY_IN_USE` | `ConflictException`     | El correo electrónico ya está registrado.                     |
-| `INVALID_CREDENTIALS`  | `UnauthorizedException` | Usuario o contraseña incorrectos.                             |
-| `INVALID_TOKEN`        | `UnauthorizedException` | El token JWT es inválido.                                     |
-| `EXPIRED_TOKEN`        | `UnauthorizedException` | El token JWT ha expirado.                                     |
-| `SESSION_NOT_FOUND`    | `NotFoundException`     | La sesión de refresco no existe.                              |
-| `TOKEN_REVOKED`        | `UnauthorizedException` | El token ha sido revocado por seguridad (detección de reúso). |
+| Código (`code`)           | Base Exception                 | Descripción                                                    |
+|:--------------------------|:-------------------------------|:---------------------------------------------------------------|
+| `USER_NOT_FOUND`          | `NotFoundException`            | El usuario solicitado no existe.                               |
+| `ROLE_NOT_FOUND`          | `NotFoundException`            | El rol solicitado no existe.                                   |
+| `EMAIL_ALREADY_IN_USE`    | `ConflictException`            | El correo electrónico ya está registrado.                      |
+| `USER_INVALID_ROLE`       | `UnprocessableEntityException` | El rol asignado no es válido para este proceso de creación.    |
+| `USER_CREATION_FORBIDDEN` | `ForbiddenException`           | El usuario no tiene permisos para crear usuarios con este rol. |
+| `INVALID_CREDENTIALS`     | `UnauthorizedException`        | Usuario o contraseña incorrectos.                              |
+| `INVALID_TOKEN`           | `UnauthorizedException`        | El token JWT es inválido.                                      |
+| `EXPIRED_TOKEN`           | `UnauthorizedException`        | El token JWT ha expirado.                                      |
+| `SESSION_NOT_FOUND`       | `NotFoundException`            | La sesión de refresco no existe.                               |
+| `TOKEN_REVOKED`           | `UnauthorizedException`        | El token ha sido revocado por seguridad (detección de reúso).  |
 
 ### Módulo: Shipment
 | Código (`code`)                | Base Exception                 | Descripción                                                              |

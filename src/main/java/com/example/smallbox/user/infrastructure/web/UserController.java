@@ -1,10 +1,12 @@
 package com.example.smallbox.user.infrastructure.web;
 
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
+import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.user.application.UserService;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
 import com.example.smallbox.user.application.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,8 +53,13 @@ public class UserController {
             }
     )
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody CreateUserRequest request,
+            @Parameter(hidden = true) java.security.Principal principal
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUser(request, principal.getName()));
     }
 
     @Operation(
@@ -70,6 +78,7 @@ public class UserController {
             }
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE')")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
@@ -79,14 +88,18 @@ public class UserController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "List of users",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))
+                            description = "Paginated list of users",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
                     )
             }
     )
     @GetMapping
-    public ResponseEntity<List<UserResponse>> listUsers() {
-        return ResponseEntity.ok(userService.listUsers());
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<PaginatedResponse<UserResponse>> listUsers(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(userService.listUsers(limit, offset));
     }
 
     @Operation(
@@ -101,6 +114,7 @@ public class UserController {
             }
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

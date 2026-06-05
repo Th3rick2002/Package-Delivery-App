@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE branch SET deleted_at = now(), deleted_by = ? WHERE branch_id = ?")
+@SQLDelete(sql = "UPDATE branch SET deleted_at = now() WHERE branch_id = ?")
 @SQLRestriction(value = "deleted_at IS NULL")
 public class BranchEntity {
     @Id
