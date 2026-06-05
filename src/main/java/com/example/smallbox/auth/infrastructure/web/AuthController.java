@@ -52,8 +52,8 @@ public class AuthController {
     private static final String BLACKLIST_PREFIX = "jwt:blacklist:";
 
     @Operation(
-            summary = "Login to the system",
-            description = "Authenticates a user and sets 'accessToken' and 'refreshToken' cookies.",
+            summary = "Login for clients",
+            description = "Authenticates a clients and sets 'accessToken' and 'refreshToken' cookies.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -80,6 +80,41 @@ public class AuthController {
         
         JwtTokenDTO tokens = authService.login(request, ip, ua);
         
+        setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
+        setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Login for staff",
+            description = "Authenticates a staff user and sets 'accessToken' and 'refreshToken' cookies.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Login successful",
+                            headers = {
+                                    @Header(name = "Set-Cookie", description = "Access and Refresh tokens")
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Invalid credentials",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @PostMapping("/private/login")
+    public ResponseEntity<?> privateLogin(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response
+    ) {
+        String ip = extractIp(httpRequest);
+        String ua = httpRequest.getHeader("User-Agent");
+
+        JwtTokenDTO tokens = authService.loginAdministrative(request, ip, ua);
+
         setTokenCookie("accessToken", tokens.accessToken(), accessTokenMs / 1000, "/", response);
         setTokenCookie("refreshToken", tokens.refreshToken(), refreshTokenMs / 1000, "/api/v1/auth/refresh", response);
 

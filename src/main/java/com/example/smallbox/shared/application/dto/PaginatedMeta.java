@@ -3,9 +3,13 @@ package com.example.smallbox.shared.application.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Metadata for paginated responses")
 public class PaginatedMeta {
     @Schema(description = "The offset from which the page starts", example = "0")

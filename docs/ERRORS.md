@@ -55,8 +55,10 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | `LOCATION_NOT_FOUND`         | `NotFoundException`            | La ubicación (departamento) especificada no existe.              |
 | `BRANCH_INACTIVE`            | `UnprocessableEntityException` | La sucursal está inactiva o eliminada y no permite asignaciones. |
 | `BRANCH_USER_NOT_FOUND`      | `NotFoundException`            | El usuario no está asignado a la sucursal especificada.          |
+| `BRANCH_USER_NOT_ASSIGNED`   | `NotFoundException`            | El usuario no está asignado a ninguna sucursal.                  |
 | `BRANCH_USER_ALREADY_EXISTS` | `ConflictException`            | El usuario ya se encuentra asignado a la sucursal.               |
 | `INVALID_ROLE_FOR_BRANCH`    | `UnprocessableEntityException` | El rol del usuario no es apto para ser asignado a una sucursal.  |
+| `BRANCH_ASSIGNMENT_REVOKED`  | `UnauthorizedException`        | La asignación a la sucursal ha sido revocada o es inexistente.   |
 
 ### Módulo: Auth / User
 | Código (`code`)           | Base Exception                 | Descripción                                                    |

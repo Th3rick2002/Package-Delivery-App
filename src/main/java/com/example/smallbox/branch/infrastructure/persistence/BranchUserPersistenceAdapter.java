@@ -27,8 +27,20 @@ public class BranchUserPersistenceAdapter implements BranchUserRepository {
     }
 
     @Override
+    public Page<BranchUser> findAll(Pageable pageable) {
+        return jpaBranchUserRepository.findAll(pageable)
+                .map(BranchUserMapper::toDomain);
+    }
+
+    @Override
     public Optional<BranchUser> findById(BranchID branchId, UserId userId) {
         return jpaBranchUserRepository.findById(new BranchUserJpaEntity.BranchUserId(branchId.id(), userId.uuid()))
+                .map(BranchUserMapper::toDomain);
+    }
+
+    @Override
+    public Optional<BranchUser> findByUserId(UserId userId) {
+        return jpaBranchUserRepository.findByUserId(userId.uuid())
                 .map(BranchUserMapper::toDomain);
     }
 
