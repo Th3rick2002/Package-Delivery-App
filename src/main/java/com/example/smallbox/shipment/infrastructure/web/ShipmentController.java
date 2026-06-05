@@ -66,7 +66,7 @@ public class ShipmentController {
             }
     )
     @PostMapping
-    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     public ResponseEntity<ShipmentResponse> createShipment(@Valid @RequestBody CreateShipmentRequest request) {
         ShipmentResponse response = createShipmentUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -89,7 +89,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}")
-    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Cacheable(value = "shipments", key = "#trackingNumber")
     public ResponseEntity<ShipmentResponse> getShipment(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")
@@ -119,7 +119,7 @@ public class ShipmentController {
             }
     )
     @PatchMapping("/{trackingNumber}/status")
-    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Caching(evict = {
             @CacheEvict(value = "shipments", key = "#trackingNumber"),
             @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
@@ -152,7 +152,7 @@ public class ShipmentController {
             }
     )
     @GetMapping("/{trackingNumber}/history")
-    @PreAuthorize("hasAnyRole('BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
     @Cacheable(value = "shipment_histories", key = "#trackingNumber + #limit + #offset")
     public ResponseEntity<PaginatedResponse<ShipmentHistoryResponse>> getHistory(
             @Parameter(description = "The tracking number of the shipment", example = "SB-20260531-143000123456")

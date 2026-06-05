@@ -11,7 +11,9 @@ import java.util.Optional;
 
 public interface BranchUserRepository {
     BranchUser save(BranchUser branchUser);
+    Page<BranchUser> findAll(Pageable pageable);
     Optional<BranchUser> findById(BranchID branchId, UserId userId);
+    Optional<BranchUser> findByUserId(UserId userId);
     Page<BranchUser> findByBranchId(BranchID branchId, Pageable pageable);
     boolean existsById(BranchID branchId, UserId userId);
 }

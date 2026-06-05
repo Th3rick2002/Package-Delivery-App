@@ -2,6 +2,7 @@ package com.example.smallbox.auth.infrastructure.security.filter;
 
 import com.example.smallbox.auth.infrastructure.security.jwt.JwtService;
 import com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal;
+import com.example.smallbox.auth.infrastructure.security.service.StaffUserPrincipal;
 import com.example.smallbox.auth.infrastructure.security.service.TokenBlacklistVerifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -71,10 +73,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String role = jwtService.getRoleFromToken(token);
         UUID userId = jwtService.getUserIdFromToken(token);
 
+        UserDetails userDetails;
+
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var authorities = List.of(new SimpleGrantedAuthority(role));
-            var principal = new CustomUserPrincipal(userId, email, null, authorities);
-            var authtoken = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+
+            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"))) {
+                userDetails = new CustomUserPrincipal(userId, email, null, authorities);
+            } else {
+                Integer branchId = jwtService.getBranchIdFromToken(token);
+                userDetails = new StaffUserPrincipal(userId, email,null, authorities, branchId );
+            }
+
+            var authtoken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             authtoken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authtoken);
             MDC.put("userId", authtoken.getName());

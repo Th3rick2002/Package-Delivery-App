@@ -6,6 +6,10 @@ import java.util.UUID;
 
 @Schema(description = "Request to assign a user to a branch")
 public record AssignUserRequest(
+    @Schema(description = "ID of the branch to assign")
+    @NotNull(message = "El ID de la sucursal es obligatorio")
+    Integer branchId,
+
     @Schema(description = "ID of the user to assign")
     @NotNull(message = "El ID de usuario es obligatorio")
     UUID userId

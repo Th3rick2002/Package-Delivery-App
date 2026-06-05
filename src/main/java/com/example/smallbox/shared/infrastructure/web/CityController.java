@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/cities")
+@RequestMapping("/api/v1/cities")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Locations", description = "Endpoints for retrieving location data like cities and departments")
