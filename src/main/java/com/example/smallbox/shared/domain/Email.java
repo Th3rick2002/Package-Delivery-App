@@ -1,5 +1,6 @@
 package com.example.smallbox.shared.domain;
 
+import com.example.smallbox.shared.domain.exception.InvalidEmailFormatException;
 import java.util.regex.Pattern;
 
 public record Email(String value) {
@@ -8,13 +9,13 @@ public record Email(String value) {
 
     public Email(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Email cannot be empty");
+            throw new InvalidEmailFormatException(value);
         }
 
         value = value.trim().toLowerCase();
 
         if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException("Invalid email format " + value);
+            throw new InvalidEmailFormatException(value);
         }
         this.value = value;
     }

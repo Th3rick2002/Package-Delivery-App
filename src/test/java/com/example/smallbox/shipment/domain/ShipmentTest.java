@@ -16,6 +16,9 @@ import com.example.smallbox.shipment.domain.exception.UnsupportedWeightUnitExcep
 import com.example.smallbox.shipment.domain.vo.Dimensions;
 import com.example.smallbox.shipment.domain.vo.Weight;
 import org.junit.jupiter.api.Test;
+import com.example.smallbox.shared.domain.exception.InvalidEmailFormatException;
+import com.example.smallbox.shared.domain.exception.InvalidPhoneFormatException;
+import com.example.smallbox.shipment.domain.exception.SameOriginAndDestinationBranchException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -148,6 +151,45 @@ class ShipmentTest {
         );
 
         assertEquals("EXACT_ADDRESS_REQUIRED", exception.getErrorCode());
+    }
+
+    @Test
+    void shipmentRejectsSameOriginAndDestinationBranchWithSemanticCode() {
+        SameOriginAndDestinationBranchException exception = assertThrows(
+                SameOriginAndDestinationBranchException.class,
+                () -> Shipment.create(
+                        UserId.generate(),
+                        validRecipient(),
+                        new LocationId(28),
+                        "Colonia Centro #123",
+                        new BranchID(1),
+                        new BranchID(1),
+                        validPackages(),
+                        "SB"
+                )
+        );
+
+        assertEquals("SAME_ORIGIN_AND_DESTINATION_BRANCH", exception.getErrorCode());
+    }
+
+    @Test
+    void phoneRejectsInvalidFormatWithSemanticCode() {
+        InvalidPhoneFormatException exception = assertThrows(
+                InvalidPhoneFormatException.class,
+                () -> new Phone("invalid-phone")
+        );
+
+        assertEquals("INVALID_PHONE_FORMAT", exception.getErrorCode());
+    }
+
+    @Test
+    void emailRejectsInvalidFormatWithSemanticCode() {
+        InvalidEmailFormatException exception = assertThrows(
+                InvalidEmailFormatException.class,
+                () -> new Email("invalid-email")
+        );
+
+        assertEquals("INVALID_EMAIL_FORMAT", exception.getErrorCode());
     }
 
     private Recipient validRecipient() {
