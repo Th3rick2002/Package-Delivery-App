@@ -46,6 +46,7 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 | Método  | Endpoint                    | Descripción                                             | Acceso                          |
 |:--------|:----------------------------|:--------------------------------------------------------|:--------------------------------|
 | `POST`  | `/`                         | Crea un nuevo envío con sus paquetes y destinatario.    | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
+| `GET`   | `/`                         | Obtiene la lista paginada y simplificada de todos los envíos. | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
 | `GET`   | `/{trackingNumber}`         | Obtiene los detalles de un envío por su número de guía. | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
 | `PATCH` | `/{trackingNumber}/status`  | Actualiza el estado de un envío.                        | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
 | `GET`   | `/{trackingNumber}/history` | Obtiene el historial de estados de un envío.            | BRANCH_ADMIN, EMPLOYEE, CLIENT  |

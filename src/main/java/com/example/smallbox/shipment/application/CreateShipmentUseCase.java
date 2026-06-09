@@ -15,6 +15,7 @@ import com.example.smallbox.shipment.domain.vo.Weight;
 import com.example.smallbox.user.domain.UserRepository;
 import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class CreateShipmentUseCase {
     private final UserRepository userRepository;
     private final ShipmentDomainService shipmentDomainService;
 
+    @CacheEvict(value = "shipments", allEntries = true)
     @Transactional
     public ShipmentResponse execute(CreateShipmentRequest request) {
         UserId senderId = new UserId(request.senderId());

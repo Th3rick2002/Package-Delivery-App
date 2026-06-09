@@ -7,9 +7,12 @@ import com.example.smallbox.shared.application.dto.PaginatedMeta;
 import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.shipment.application.GetShipmentHistoryUseCase;
 import com.example.smallbox.shipment.application.GetShipmentUseCase;
+import com.example.smallbox.shipment.application.GetShipmentsUseCase;
 import com.example.smallbox.shipment.application.UpdateShipmentStatusUseCase;
+import com.example.smallbox.shipment.application.dto.CreateShipmentRequest;
 import com.example.smallbox.shipment.application.dto.ShipmentHistoryResponse;
 import com.example.smallbox.shipment.application.dto.ShipmentResponse;
+import com.example.smallbox.shipment.application.dto.ShipmentSummaryResponse;
 import com.example.smallbox.shipment.application.dto.UpdateShipmentStatusRequest;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,6 +62,9 @@ class ShipmentControllerTest {
     @MockitoBean
     private GetShipmentUseCase getShipmentUseCase;
 
+    @MockitoBean
+    private GetShipmentsUseCase getShipmentsUseCase;
+
     private String trackingNumber = "SB-20260531-143000123456";
     private CustomUserPrincipal principal;
 
@@ -92,6 +98,38 @@ class ShipmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.trackingNumber").value(trackingNumber))
                 .andExpect(jsonPath("$.status").value("CREATED"));
+    }
+
+    @Test
+    @WithMockUser(roles = "EMPLOYEE")
+    void getAllShipments_ShouldReturnPaginatedSummaries() throws Exception {
+        ShipmentSummaryResponse summary = new ShipmentSummaryResponse(
+                1L,
+                trackingNumber,
+                "CREATED",
+                new BigDecimal("25.50"),
+                "USD",
+                UUID.randomUUID(),
+                1,
+                1,
+                2,
+                LocalDateTime.now()
+        );
+
+        when(getShipmentsUseCase.execute(any(), any()))
+                .thenReturn(PaginatedResponse.<ShipmentSummaryResponse>builder()
+                        .data(List.of(summary))
+                        .meta(PaginatedMeta.builder().limit(20).offset(0).totalElements(1L).totalPages(1).build())
+                        .build());
+
+        mockMvc.perform(get("/api/v1/shipments")
+                        .param("limit", "20")
+                        .param("offset", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data[0].trackingNumber").value(trackingNumber))
+                .andExpect(jsonPath("$.data[0].status").value("CREATED"))
+                .andExpect(jsonPath("$.meta").exists());
     }
 
     @Test

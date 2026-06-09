@@ -21,7 +21,7 @@ public class UpdateShipmentStatusUseCase {
     private final ApplicationEventPublisher eventPublisher;
 
     @Caching(evict = {
-            @CacheEvict(value = "shipments", key = "#trackingNumber"),
+            @CacheEvict(value = "shipments", allEntries = true),
             @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
     })
     @Transactional
