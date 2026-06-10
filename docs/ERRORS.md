@@ -75,34 +75,44 @@ Cada módulo debe extender las excepciones base para proporcionar contexto de ne
 | `TOKEN_REVOKED`           | `UnauthorizedException`        | El token ha sido revocado por seguridad (detección de reúso).  |
 
 ### Módulo: Shipment
-| Código (`code`)                | Base Exception                 | Descripción                                                              |
-|:-------------------------------|:-------------------------------|:-------------------------------------------------------------------------|
-| `SHIPMENT_NOT_FOUND`           | `NotFoundException`            | El envío solicitado no existe.                                           |
-| `INVALID_SHIPMENT_STATUS`      | `UnprocessableEntityException` | La operación no es permitida para el estado actual del envío.            |
-| `TRACKING_NUMBER_NOT_FOUND`    | `NotFoundException`            | No se encontró ningún envío con el número de guía proporcionado.         |
-| `PACKAGE_NOT_FOUND`            | `NotFoundException`            | El paquete especificado no existe en el envío.                           |
-| `INVALID_PACKAGE_DIMENSIONS`   | `BadRequestException`          | Las dimensiones o peso del paquete no cumplen con los requisitos.        |
-| `PACKAGE_DESCRIPTION_REQUIRED` | `BadRequestException`          | La descripción del paquete es obligatoria.                               |
-| `PACKAGE_REQUIRED`             | `BadRequestException`          | El envío debe contener al menos un paquete.                              |
-| `WEIGHT_REQUIRED`              | `BadRequestException`          | El peso del paquete es obligatorio.                                      |
-| `INVALID_WEIGHT`               | `BadRequestException`          | El peso debe ser mayor a cero.                                           |
-| `UNSUPPORTED_WEIGHT_UNIT`      | `BadRequestException`          | Unidad de peso no soportada (Solo KG).                                   |
-| `DIMENSIONS_REQUIRED`          | `BadRequestException`          | Las dimensiones del paquete son obligatorias.                            |
-| `INVALID_DIMENSION_LENGTH`     | `BadRequestException`          | El largo debe ser mayor a cero.                                          |
-| `INVALID_DIMENSION_WIDTH`      | `BadRequestException`          | El ancho debe ser mayor a cero.                                          |
-| `INVALID_DIMENSION_HEIGHT`     | `BadRequestException`          | El alto debe ser mayor a cero.                                           |
-| `UNSUPPORTED_DIMENSION_UNIT`   | `BadRequestException`          | Unidad de dimensión no soportada (Solo CM).                              |
-| `INVALID_TRACKING_NUMBER`      | `BadRequestException`          | El formato del número de guía es inválido.                               |
-| `INVALID_TRACKING_PREFIX`      | `BadRequestException`          | El prefijo del número de guía es inválido (2-4 letras).                  |
-| `CURRENCY_REQUIRED`            | `BadRequestException`          | La moneda es obligatoria.                                                |
-| `INVALID_PRICE_AMOUNT`         | `BadRequestException`          | El monto del precio debe ser mayor a cero.                               |
-| `UNSUPPORTED_CURRENCY`         | `BadRequestException`          | Moneda no soportada (Solo USD).                                          |
-| `CURRENCY_MISMATCH`            | `BadRequestException`          | No se pueden realizar operaciones con diferentes monedas.                |
-| `RECIPIENT_NAME_REQUIRED`      | `BadRequestException`          | El nombre del destinatario es obligatorio.                               |
-| `INVALID_RECIPIENT_NAME`       | `BadRequestException`          | El nombre del destinatario contiene caracteres inválidos o es muy corto. |
-| `RECIPIENT_PHONE_REQUIRED`     | `BadRequestException`          | El teléfono del destinatario es obligatorio.                             |
-| `RECIPIENT_EMAIL_REQUIRED`     | `BadRequestException`          | El correo del destinatario es obligatorio.                               |
-| `UNKNOWN_SHIPMENT_STATUS`      | `BadRequestException`          | El ID del estado de envío no es reconocido.                              |
+| Código (`code`)                          | Base Exception                 | Descripción                                                              |
+|:-----------------------------------------|:-------------------------------|:-------------------------------------------------------------------------|
+| `SHIPMENT_NOT_FOUND`                     | `NotFoundException`            | El envío solicitado no existe.                                           |
+| `INVALID_SHIPMENT_STATUS`                | `UnprocessableEntityException` | La operación no es permitida para el estado actual del envío.            |
+| `TRACKING_NUMBER_NOT_FOUND`              | `NotFoundException`            | No se encontró ningún envío con el número de guía proporcionado.         |
+| `PACKAGE_NOT_FOUND`                      | `NotFoundException`            | El paquete especificado no existe en el envío.                           |
+| `INVALID_PACKAGE_DIMENSIONS`             | `BadRequestException`          | Las dimensiones o peso del paquete no cumplen con los requisitos.        |
+| `PACKAGE_DESCRIPTION_REQUIRED`           | `BadRequestException`          | La descripción del paquete es obligatoria.                               |
+| `PACKAGE_REQUIRED`                       | `BadRequestException`          | El envío debe contener al menos un paquete.                              |
+| `WEIGHT_REQUIRED`                        | `BadRequestException`          | El peso del paquete es obligatorio.                                      |
+| `INVALID_WEIGHT`                         | `BadRequestException`          | El peso debe ser mayor a cero.                                           |
+| `UNSUPPORTED_WEIGHT_UNIT`                | `BadRequestException`          | Unidad de peso no soportada (Solo KG).                                   |
+| `DIMENSIONS_REQUIRED`                    | `BadRequestException`          | Las dimensiones del paquete son obligatorias.                            |
+| `INVALID_DIMENSION_LENGTH`               | `BadRequestException`          | El largo debe ser mayor a cero.                                          |
+| `INVALID_DIMENSION_WIDTH`                | `BadRequestException`          | El ancho debe ser mayor a cero.                                          |
+| `INVALID_DIMENSION_HEIGHT`               | `BadRequestException`          | El alto debe ser mayor a cero.                                           |
+| `UNSUPPORTED_DIMENSION_UNIT`             | `BadRequestException`          | Unidad de dimensión no soportada (Solo CM).                              |
+| `INVALID_TRACKING_NUMBER`                | `BadRequestException`          | El formato del número de guía es inválido.                               |
+| `INVALID_TRACKING_PREFIX`                | `BadRequestException`          | El prefijo del número de guía es inválido (2-4 letras).                  |
+| `CURRENCY_REQUIRED`                      | `BadRequestException`          | La moneda es obligatoria.                                                |
+| `INVALID_PRICE_AMOUNT`                   | `BadRequestException`          | El monto del precio debe ser mayor a cero.                               |
+| `UNSUPPORTED_CURRENCY`                   | `BadRequestException`          | Moneda no soportada (Solo USD).                                          |
+| `CURRENCY_MISMATCH`                      | `BadRequestException`          | No se pueden realizar operaciones con diferentes monedas.                |
+| `RECIPIENT_NAME_REQUIRED`                | `BadRequestException`          | El nombre del destinatario es obligatorio.                               |
+| `INVALID_RECIPIENT_NAME`                 | `BadRequestException`          | El nombre del destinatario contiene caracteres inválidos o es muy corto. |
+| `RECIPIENT_PHONE_REQUIRED`               | `BadRequestException`          | El teléfono del destinatario es obligatorio.                             |
+| `RECIPIENT_EMAIL_REQUIRED`               | `BadRequestException`          | El correo del destinatario es obligatorio.                               |
+| `UNKNOWN_SHIPMENT_STATUS`                | `BadRequestException`          | El ID del estado de envío no es reconocido.                              |
+| `SAME_ORIGIN_AND_DESTINATION_BRANCH`     | `UnprocessableEntityException` | La sucursal de origen y destino no pueden ser la misma.                  |
+| `INVALID_PHONE_FORMAT`                   | `BadRequestException`          | El formato del número de teléfono es inválido.                          |
+| `INVALID_EMAIL_FORMAT`                   | `BadRequestException`          | El formato del correo electrónico es inválido.                           |
+| `EXACT_ADDRESS_REQUIRED`                 | `BadRequestException`          | La dirección exacta de destino es obligatoria.                           |
+| `SENDER_REQUIRED`                        | `BadRequestException`          | El remitente es obligatorio.                                             |
+| `ORIGIN_BRANCH_REQUIRED`                 | `BadRequestException`          | La sucursal de origen es obligatoria.                                    |
+| `DESTINATION_BRANCH_REQUIRED`            | `BadRequestException`          | La sucursal de destino es obligatoria.                                   |
+| `SHIPMENT_STATUS_REQUIRED`               | `BadRequestException`          | El estado del envío es obligatorio.                                      |
+| `TOTAL_PRICE_REQUIRED`                   | `BadRequestException`          | El precio total es obligatorio.                                          |
+| `CREATION_DATE_REQUIRED`                 | `BadRequestException`          | La fecha de creación es obligatoria.                                     |
 
 ---
 

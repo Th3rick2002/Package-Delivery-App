@@ -8,10 +8,12 @@ import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.application.CreateShipmentUseCase;
 import com.example.smallbox.shipment.application.GetShipmentHistoryUseCase;
 import com.example.smallbox.shipment.application.GetShipmentUseCase;
+import com.example.smallbox.shipment.application.GetShipmentsUseCase;
 import com.example.smallbox.shipment.application.UpdateShipmentStatusUseCase;
 import com.example.smallbox.shipment.application.dto.CreateShipmentRequest;
 import com.example.smallbox.shipment.application.dto.ShipmentHistoryResponse;
 import com.example.smallbox.shipment.application.dto.ShipmentResponse;
+import com.example.smallbox.shipment.application.dto.ShipmentSummaryResponse;
 import com.example.smallbox.shipment.application.dto.UpdateShipmentStatusRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,6 +50,7 @@ public class ShipmentController {
     private final UpdateShipmentStatusUseCase updateShipmentStatusUseCase;
     private final GetShipmentHistoryUseCase getShipmentHistoryUseCase;
     private final GetShipmentUseCase getShipmentUseCase;
+    private final GetShipmentsUseCase getShipmentsUseCase;
 
     @Operation(
             summary = "Create a new shipment",
@@ -66,10 +69,30 @@ public class ShipmentController {
             }
     )
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'CLIENT')")
     public ResponseEntity<ShipmentResponse> createShipment(@Valid @RequestBody CreateShipmentRequest request) {
         ShipmentResponse response = createShipmentUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(
+            summary = "Get all shipments",
+            description = "Retrieves a paginated list of shipments with reduced information (IDs only for relationships).",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Shipments retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = PaginatedResponse.class))
+                    )
+            }
+    )
+    @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<PaginatedResponse<ShipmentSummaryResponse>> getAllShipments(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "offset", required = false) Integer offset
+    ) {
+        return ResponseEntity.ok(getShipmentsUseCase.execute(limit, offset));
     }
 
     @Operation(

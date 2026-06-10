@@ -24,12 +24,6 @@ public record CreateShipmentRequest(
         @Schema(description = "ID of the branch where the shipment will be delivered")
         @NotNull Integer destinationBranchId,
 
-        @Schema(description = "ID of the destination city")
-        @NotNull Integer destinationCityId,
-
-        @Schema(description = "Exact delivery address", example = "Calle 123 #45-67, Edificio Torres, Apto 402")
-        @NotBlank String exactAddress,
-
         @Schema(description = "List of packages included in the shipment")
         @NotEmpty @Valid List<PackageRequest> packages
 ) {
@@ -62,7 +56,7 @@ public record CreateShipmentRequest(
             @Schema(description = "Weight of the package", example = "2.5")
             @Positive double weight,
 
-            @Schema(description = "Unit of weight (KG, LB)", example = "KG")
+            @Schema(description = "Unit of weight (KG)", example = "KG")
             @NotBlank String weightUnit,
 
             @Schema(description = "Length of the package", example = "40.0")
@@ -74,7 +68,7 @@ public record CreateShipmentRequest(
             @Schema(description = "Height of the package", example = "10.0")
             @Positive double height,
 
-            @Schema(description = "Unit of dimensions (CM, IN)", example = "CM")
+            @Schema(description = "Unit of dimensions (CM)", example = "CM")
             @NotBlank String dimensionsUnit
     ) {}
 }

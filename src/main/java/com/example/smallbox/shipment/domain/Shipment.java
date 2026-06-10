@@ -5,9 +5,7 @@ import com.example.smallbox.shared.domain.LocationId;
 import com.example.smallbox.shared.domain.UserId;
 import com.example.smallbox.shipment.domain.enums.ShipmentStatus;
 import com.example.smallbox.shipment.domain.event.ShipmentStatusChangedEvent;
-import com.example.smallbox.shipment.domain.exception.InvalidShipmentStatusException;
-import com.example.smallbox.shipment.domain.exception.PackageRequiredException;
-import com.example.smallbox.shipment.domain.exception.ShipmentFieldRequiredException;
+import com.example.smallbox.shipment.domain.exception.*;
 import com.example.smallbox.shipment.domain.vo.Price;
 import com.example.smallbox.shipment.domain.vo.TrackingNumber;
 
@@ -80,11 +78,11 @@ public class Shipment {
         if (destinationBranchId == null) {
             throw new ShipmentFieldRequiredException("DESTINATION_BRANCH");
         }
+        if (originBranchId.equals(destinationBranchId)) {
+            throw new SameOriginAndDestinationBranchException();
+        }
         if (status == null) {
             throw new ShipmentFieldRequiredException("SHIPMENT_STATUS");
-        }
-        if (packages == null || packages.isEmpty()) {
-            throw new PackageRequiredException();
         }
         if (totalPrice == null) {
             throw new ShipmentFieldRequiredException("TOTAL_PRICE");
@@ -92,6 +90,9 @@ public class Shipment {
         if (createdAt == null) {
             throw new ShipmentFieldRequiredException("CREATION_DATE");
         }
+
+        validatePackagesLimit(packages);
+        validatePackagesDimensions(packages);
 
         this.shipmentId = shipmentId;
         this.trackingNumber = trackingNumber;
@@ -120,6 +121,38 @@ public class Shipment {
     public List<Package> packages() { return packages; }
     public Price totalPrice() { return totalPrice; }
     public LocalDateTime createdAt() { return createdAt; }
+
+    private static void validatePackagesLimit(List<Package> packages) {
+        final int maxPackages = 5;
+
+        if (packages == null || packages.isEmpty()) {
+            throw new PackageRequiredException();
+        }
+
+        if (packages.size() > maxPackages) {
+            throw new InvalidPackageLimitException(maxPackages);
+        }
+    }
+
+    private static void validatePackagesDimensions(List<Package> packages) {
+        final int maxWeight = 50;
+        final int maxDimensions = 500;
+
+        for (Package pkg : packages) {
+            if (pkg.weight().value().compareTo(BigDecimal.valueOf(maxWeight)) > 0) {
+                throw new InvalidUnitPackageLimitException("weight", maxWeight);
+            }
+            if (pkg.dimensions().length().compareTo(BigDecimal.valueOf(maxDimensions)) > 0) {
+                throw new InvalidUnitPackageLimitException("length", maxDimensions);
+            }
+            if (pkg.dimensions().width().compareTo(BigDecimal.valueOf(maxDimensions)) > 0) {
+                throw new InvalidUnitPackageLimitException("width", maxDimensions);
+            }
+            if (pkg.dimensions().height().compareTo(BigDecimal.valueOf(maxDimensions)) > 0) {
+                throw new InvalidUnitPackageLimitException("height", maxDimensions);
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Behavior: state machine
