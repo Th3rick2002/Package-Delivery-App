@@ -7,6 +7,8 @@ import com.example.smallbox.shipment.domain.exception.ShipmentNotFoundException;
 import com.example.smallbox.shipment.domain.port.ShipmentRepository;
 import com.example.smallbox.shipment.domain.vo.TrackingNumber;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,10 @@ public class UpdateShipmentStatusUseCase {
     private final ShipmentRepository shipmentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Caching(evict = {
+            @CacheEvict(value = "shipments", allEntries = true),
+            @CacheEvict(value = "shipment_histories", key = "#trackingNumber")
+    })
     @Transactional
     public void execute(String trackingNumber, ShipmentStatus newStatus, UserId changedBy, String comments) {
         Shipment shipment = shipmentRepository.findByTrackingNumber(new TrackingNumber(trackingNumber))
