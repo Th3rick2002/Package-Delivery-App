@@ -12,7 +12,9 @@ import com.example.smallbox.shipment.domain.port.ShipmentRepository;
 import com.example.smallbox.shipment.domain.service.ShipmentDomainService;
 import com.example.smallbox.shipment.domain.vo.Dimensions;
 import com.example.smallbox.shipment.domain.vo.Weight;
+import com.example.smallbox.user.domain.User;
 import com.example.smallbox.user.domain.UserRepository;
+import com.example.smallbox.user.domain.exceptions.UserInvalidRoleException;
 import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,8 +38,13 @@ public class CreateShipmentUseCase {
     @Transactional
     public ShipmentResponse execute(CreateShipmentRequest request) {
         UserId senderId = new UserId(request.senderId());
-        userRepository.findById(senderId)
+        User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new UserNotFoundException(request.senderId().toString()));
+
+        String senderRole = sender.getRole().getName();
+        if ("ROLE_SUPER_ADMIN".equals(senderRole) || "ROLE_BRANCH_ADMIN".equals(senderRole)) {
+            throw new UserInvalidRoleException("Super admins and branch admins cannot be shipment senders.");
+        }
 
         Recipient recipient = buildRecipient(request.recipient());
         List<Package> packages = buildPackages(request.packages());

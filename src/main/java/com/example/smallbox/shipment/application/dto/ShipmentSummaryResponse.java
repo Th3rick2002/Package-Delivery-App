@@ -35,6 +35,9 @@ public record ShipmentSummaryResponse(
         @Schema(description = "ID of the destination branch")
         Integer destinationBranchId,
 
+        @Schema(description = "Total number of packages in the shipment", example = "2")
+        Integer packageCount,
+
         @Schema(description = "Timestamp when the shipment was created")
         LocalDateTime createdAt
 ) {
@@ -49,6 +52,7 @@ public record ShipmentSummaryResponse(
                 shipment.destinationCityId().cityId(),
                 shipment.originBranchId().id(),
                 shipment.destinationBranchId().id(),
+                shipment.packages().size(),
                 shipment.createdAt()
         );
     }

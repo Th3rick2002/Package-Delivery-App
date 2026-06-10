@@ -69,7 +69,7 @@ public class ShipmentController {
             }
     )
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN', 'EMPLOYEE', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'CLIENT')")
     public ResponseEntity<ShipmentResponse> createShipment(@Valid @RequestBody CreateShipmentRequest request) {
         ShipmentResponse response = createShipmentUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

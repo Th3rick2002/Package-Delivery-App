@@ -113,6 +113,7 @@ class ShipmentControllerTest {
                 1,
                 1,
                 2,
+                3,
                 LocalDateTime.now()
         );
 
