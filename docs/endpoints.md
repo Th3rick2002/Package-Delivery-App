@@ -17,6 +17,7 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 | Método   | Endpoint | Descripción                            | Acceso                              |
 |:---------|:---------|:---------------------------------------|:------------------------------------|
 | `GET`    | `/`      | Lista todos los usuarios registrados.  | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
+| `GET`    | `/me`    | Obtiene la información del perfil del usuario autenticado. | Autenticado |
 | `GET`    | `/{id}`  | Obtiene detalles de un usuario por ID. | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
 | `POST`   | `/`      | Crea un nuevo usuario.                 | SUPER_ADMIN, BRANCH_ADMIN           |
 | `DELETE` | `/{id}`  | Elimina físicamente un usuario.        | SUPER_ADMIN, BRANCH_ADMIN           |
