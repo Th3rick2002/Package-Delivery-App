@@ -143,8 +143,11 @@ public class BranchController {
     )
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        branchService.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.example.smallbox.auth.infrastructure.security.service.CustomUserPrincipal principal
+    ) {
+        branchService.delete(id, principal.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

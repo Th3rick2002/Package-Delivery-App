@@ -139,8 +139,11 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        userService.deleteUser(id, principal.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

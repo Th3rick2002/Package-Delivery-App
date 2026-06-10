@@ -1,5 +1,6 @@
 package com.example.smallbox.shipment.infrastructure.persistence.entities;
 
+import com.example.smallbox.shared.infrastructure.persistence.entities.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,7 +21,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RecipientJpaEntity {
+@SQLDelete(sql = "UPDATE recipient SET deleted_at = now() WHERE recipient_id = ?")
+@SQLRestriction(value = "deleted_at IS NULL")
+public class RecipientJpaEntity extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "recipient_id")
@@ -41,22 +46,4 @@ public class RecipientJpaEntity {
 
     @Column(name = "email", nullable = false, columnDefinition = "text")
     private String email;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
 }

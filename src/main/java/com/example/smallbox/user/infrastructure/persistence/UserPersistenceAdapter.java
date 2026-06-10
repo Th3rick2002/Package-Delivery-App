@@ -45,7 +45,11 @@ public class UserPersistenceAdapter implements UserRepository {
     }
 
     @Override
-    public void delete(UserId id) {
-        userRepository.deleteById(id.uuid());
+    public void delete(UserId id, java.util.UUID deletedBy) {
+        userRepository.findById(id.uuid()).ifPresent(entity -> {
+            entity.setDeletedAt(java.time.LocalDateTime.now());
+            entity.setDeletedBy(deletedBy);
+            userRepository.save(entity);
+        });
     }
 }

@@ -8,12 +8,18 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.example.smallbox.shared.infrastructure.persistence.entities.AuditableEntity;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted_at = now() WHERE user_id = ?")
+@SQLRestriction(value = "deleted_at IS NULL")
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserJpaEntity {
+public class UserJpaEntity extends AuditableEntity {
     @Id
     @Column(name = "user_id")
     private UUID userId;
@@ -45,13 +51,4 @@ public class UserJpaEntity {
 
     @Column(name = "lastlogin")
     private LocalDateTime lastLogin;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

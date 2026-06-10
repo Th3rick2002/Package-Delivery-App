@@ -143,8 +143,8 @@ public class UserService {
             @CacheEvict(value = "users_auth", key = "#id")
     })
     @Transactional
-    public void deleteUser(UUID id) {
-        userRepository.delete(new UserId(id));
+    public void deleteUser(UUID id, UUID deletedBy) {
+        userRepository.delete(new UserId(id), deletedBy);
     }
 
     @Cacheable(value = "users_auth", key = "#email")
