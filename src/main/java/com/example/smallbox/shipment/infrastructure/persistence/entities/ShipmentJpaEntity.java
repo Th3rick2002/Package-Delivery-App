@@ -17,6 +17,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.example.smallbox.shared.infrastructure.persistence.entities.AuditableEntity;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
@@ -27,11 +29,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "shipment")
+@SQLDelete(sql = "UPDATE shipment SET deleted_at = now() WHERE shipment_id = ?")
 @SQLRestriction(value = "deleted_at IS NULL")
 @Getter
 @Setter
 @NoArgsConstructor
-public class ShipmentJpaEntity {
+public class ShipmentJpaEntity extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "shipment_id")
@@ -89,24 +92,6 @@ public class ShipmentJpaEntity {
 
     @Column(name = "processed_by")
     private UUID processedBy;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PackageJpaEntity> packages = new ArrayList<>();

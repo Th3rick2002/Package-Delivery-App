@@ -123,11 +123,11 @@ public class BranchService {
             @CacheEvict(value = "branches", key = "#id"),
             @CacheEvict(value = "branches", allEntries = true),
     })
-    public void delete(Integer id) {
+    public void delete(Integer id, java.util.UUID deletedBy) {
         if (!branchRepository.existsById(id)) {
             throw new BranchNotFoundException(id);
         }
-        branchRepository.deleteById(id);
+        branchRepository.deleteById(id, deletedBy);
     }
 
     private BranchResponse mapToResponse(Branch entity) {

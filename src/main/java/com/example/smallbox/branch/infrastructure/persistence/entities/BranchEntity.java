@@ -1,5 +1,6 @@
 package com.example.smallbox.branch.infrastructure.persistence.entities;
 
+import com.example.smallbox.shared.infrastructure.persistence.entities.AuditableEntity;
 import com.example.smallbox.shared.infrastructure.persistence.entities.DepartmentJpaEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE branch SET deleted_at = now() WHERE branch_id = ?")
 @SQLRestriction(value = "deleted_at IS NULL")
-public class BranchEntity {
+public class BranchEntity extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "branch_id")
@@ -33,22 +34,4 @@ public class BranchEntity {
 
     @Column(name = "phone_branch", nullable = false, length = 20)
     private String phoneBranch;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by", nullable = false, updatable = false)
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
 }

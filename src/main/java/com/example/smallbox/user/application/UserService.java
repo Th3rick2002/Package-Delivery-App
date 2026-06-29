@@ -7,6 +7,7 @@ import com.example.smallbox.shared.application.dto.PaginatedMeta;
 import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.user.application.dto.CreateClientRequest;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
+import com.example.smallbox.user.application.dto.UpdateUserRequest;
 import com.example.smallbox.user.application.dto.UserAuthData;
 import com.example.smallbox.user.application.dto.UserResponse;
 import com.example.smallbox.user.domain.Role;
@@ -18,6 +19,7 @@ import com.example.smallbox.user.domain.exceptions.RoleNotFoundException;
 import com.example.smallbox.user.domain.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
@@ -71,13 +73,16 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "users", key = "'all'"),
-            @CacheEvict(value = "users", key = "#request.email"),
-            @CacheEvict(value = "users_auth", key = "#request.email")
-    })
+    @Caching(
+            put = @CachePut(value = "users", key = "#result.id"),
+            evict = {
+                    @CacheEvict(value = "users", key = "'all'"),
+                    @CacheEvict(value = "users", key = "#request.email"),
+                    @CacheEvict(value = "users_auth", key = "#request.email")
+            }
+    )
     @Transactional
-    public void registerClient(CreateClientRequest request) {
+    public UserResponse registerClient(CreateClientRequest request) {
         Email email = new Email(request.email());
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyInUseException(request.email());
@@ -97,7 +102,8 @@ public class UserService {
                 passwordEncoder.encode(request.password())
         );
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return mapToResponse(savedUser);
     }
 
     @Cacheable(value = "users", key = "#id")
@@ -143,8 +149,8 @@ public class UserService {
             @CacheEvict(value = "users_auth", key = "#id")
     })
     @Transactional
-    public void deleteUser(UUID id) {
-        userRepository.delete(new UserId(id));
+    public void deleteUser(UUID id, UUID deletedBy) {
+        userRepository.delete(new UserId(id), deletedBy);
     }
 
     @Cacheable(value = "users_auth", key = "#email")
@@ -173,5 +179,80 @@ public class UserService {
                 user.getPhone().value(),
                 user.getRole().getName()
         );
+    }
+
+    @Caching(
+            put = @CachePut(value = "users", key = "#targetId"),
+            evict = {
+                    @CacheEvict(value = "users", key = "'all'"),
+                    @CacheEvict(value = "users", allEntries = true),
+                    @CacheEvict(value = "users_auth", allEntries = true)
+            }
+    )
+    @Transactional
+    public UserResponse updateUser(UUID targetId, UpdateUserRequest request, UUID requesterId, String requesterRole) {
+        User target = userRepository.findById(new UserId(targetId))
+                .orElseThrow(() -> new UserNotFoundException(targetId.toString()));
+
+        String targetRole = target.getRole().getName();
+
+        if (targetRole.equals("ROLE_CLIENT")) {
+            if (!requesterId.equals(targetId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Clients can only update their own profile.");
+            }
+        } else {
+            // Target is a staff member (EMPLOYEE, BRANCH_ADMIN, SUPER_ADMIN)
+            if (requesterId.equals(targetId)) {
+                // Staff member updating themselves
+                if (request.firstName() != null || request.secondName() != null ||
+                    request.lastName() != null || request.secondLastName() != null ||
+                    request.email() != null) {
+                    throw new org.springframework.security.access.AccessDeniedException("Staff members cannot change their own name or email details directly.");
+                }
+            } else {
+                // Someone else updating staff member: must be higher rank
+                boolean isHigher = false;
+                if (requesterRole.equals("ROLE_SUPER_ADMIN")) {
+                    isHigher = targetRole.equals("ROLE_BRANCH_ADMIN") || targetRole.equals("ROLE_EMPLOYEE");
+                } else if (requesterRole.equals("ROLE_BRANCH_ADMIN")) {
+                    isHigher = targetRole.equals("ROLE_EMPLOYEE");
+                }
+                
+                if (!isHigher) {
+                    throw new org.springframework.security.access.AccessDeniedException("You do not have permission to update this user's profile.");
+                }
+
+                if (request.password() != null) {
+                    throw new org.springframework.security.access.AccessDeniedException("Higher rank staff cannot update another user's password.");
+                }
+            }
+        }
+
+        // Apply updates
+        if (request.password() != null) {
+            String encodedPassword = passwordEncoder.encode(request.password());
+            target.updatePassword(encodedPassword);
+        }
+
+        Phone phone = request.phone() != null ? new Phone(request.phone()) : null;
+        Email email = request.email() != null ? new Email(request.email()) : null;
+
+        if (email != null && !email.value().equalsIgnoreCase(target.getEmail().value())) {
+            if (userRepository.existsByEmail(email)) {
+                throw new EmailAlreadyInUseException(request.email());
+            }
+        }
+
+        target.updateInfo(
+                request.firstName(),
+                request.secondName(),
+                request.lastName(),
+                request.secondLastName(),
+                phone,
+                email
+        );
+
+        User savedUser = userRepository.save(target);
+        return mapToResponse(savedUser);
     }
 }

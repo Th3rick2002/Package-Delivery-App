@@ -7,6 +7,8 @@ import com.example.smallbox.auth.infrastructure.security.jwt.JwtTokenDTO;
 import com.example.smallbox.shared.application.dto.ApiErrorResponse;
 import com.example.smallbox.user.application.UserService;
 import com.example.smallbox.user.application.dto.CreateClientRequest;
+import com.example.smallbox.user.application.dto.UserResponse;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -126,8 +128,9 @@ public class AuthController {
             description = "Registers a new client with the system.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "User found"
+                            responseCode = "201",
+                            description = "User registered successfully",
+                            content = @Content(schema = @Schema(implementation = UserResponse.class))
                     ),
                     @ApiResponse(
                             responseCode = "409",
@@ -137,9 +140,9 @@ public class AuthController {
             }
     )
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody CreateClientRequest request) {
-        userService.registerClient(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody CreateClientRequest request) {
+        UserResponse response = userService.registerClient(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
