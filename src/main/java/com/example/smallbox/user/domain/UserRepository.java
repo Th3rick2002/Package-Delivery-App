@@ -14,5 +14,5 @@ public interface UserRepository {
     Optional<User> findByEmail(Email email);
     Page<User> findAll(Pageable pageable);
     boolean existsByEmail(Email email);
-    void delete(UserId id);
+    void delete(UserId id, java.util.UUID deletedBy);
 }

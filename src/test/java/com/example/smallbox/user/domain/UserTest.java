@@ -124,4 +124,35 @@ class UserTest {
             )
         );
     }
+
+    @Test
+    @DisplayName("Should update user info successfully and ignore null fields")
+    void shouldUpdateUserInfoSuccessfully() {
+        User user = User.createClient(
+                clientRole,
+                "Jane",
+                "Marie",
+                "Doe",
+                "Smith",
+                new Phone("87654321"),
+                new Email("jane.doe@example.com"),
+                "password123"
+        );
+
+        user.updateInfo(
+                "Janet",
+                "",
+                "Smith",
+                "Johnson",
+                new Phone("11112222"),
+                new Email("janet.smith@example.com")
+        );
+
+        assertEquals("Janet", user.getFirstName());
+        assertNull(user.getSecondName());
+        assertEquals("Smith", user.getLastName());
+        assertEquals("Johnson", user.getSecondLastName());
+        assertEquals("11112222", user.getPhone().value());
+        assertEquals("janet.smith@example.com", user.getEmail().value());
+    }
 }

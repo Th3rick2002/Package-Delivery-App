@@ -18,12 +18,12 @@ import java.time.LocalDateTime;
 public class User {
     private final UserId id;
     private final Role role;
-    private final String firstName;
-    private final String secondName;
-    private final String lastName;
-    private final String secondLastName;
-    private final Phone phone;
-    private final Email email;
+    private String firstName;
+    private String secondName;
+    private String lastName;
+    private String secondLastName;
+    private Phone phone;
+    private Email email;
     private String hashPassword;
     
     private LocalDateTime lastLogin;
@@ -131,6 +131,23 @@ public class User {
     public void delete() {
         if (this.deletedAt != null) return;
         this.deletedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateInfo(
+            String firstName,
+            String secondName,
+            String lastName,
+            String secondLastName,
+            Phone phone,
+            Email email
+    ) {
+        if (firstName != null && !firstName.isBlank()) this.firstName = firstName;
+        if (secondName != null) this.secondName = secondName.isBlank() ? null : secondName;
+        if (lastName != null && !lastName.isBlank()) this.lastName = lastName;
+        if (secondLastName != null) this.secondLastName = secondLastName.isBlank() ? null : secondLastName;
+        if (phone != null) this.phone = phone;
+        if (email != null) this.email = email;
         this.updatedAt = LocalDateTime.now();
     }
 }

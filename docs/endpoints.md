@@ -6,7 +6,7 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 
 | Método | Endpoint         | Descripción                                                                | Acceso      |
 |:-------|:-----------------|:---------------------------------------------------------------------------|:------------|
-| `POST` | `/login`         | Autentica a un cliente y establece cookies `accessToken` y `refreshToken`.  | Público     |
+| `POST` | `/login`         | Autentica a un cliente y establece cookies `accessToken` y `refreshToken`. | Público     |
 | `POST` | `/private/login` | Autentica a un usuario administrativo y establece cookies.                 | Público     |
 | `POST` | `/register`      | Registra un nuevo cliente en el sistema.                                   | Público     |
 | `POST` | `/refresh`       | Rota los tokens usando el `refreshToken` de la cookie.                     | Público     |
@@ -14,13 +14,13 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 
 ## Módulo: Usuarios (`/api/v1/users`)
 
-| Método   | Endpoint | Descripción                            | Acceso                              |
-|:---------|:---------|:---------------------------------------|:------------------------------------|
-| `GET`    | `/`      | Lista todos los usuarios registrados.  | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
-| `GET`    | `/me`    | Obtiene la información del perfil del usuario autenticado. | Autenticado |
-| `GET`    | `/{id}`  | Obtiene detalles de un usuario por ID. | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
-| `POST`   | `/`      | Crea un nuevo usuario.                 | SUPER_ADMIN, BRANCH_ADMIN           |
-| `DELETE` | `/{id}`  | Elimina físicamente un usuario.        | SUPER_ADMIN, BRANCH_ADMIN           |
+| Método   | Endpoint | Descripción                                                | Acceso                              |
+|:---------|:---------|:-----------------------------------------------------------|:------------------------------------|
+| `GET`    | `/`      | Lista todos los usuarios registrados.                      | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
+| `GET`    | `/me`    | Obtiene la información del perfil del usuario autenticado. | Autenticado                         |
+| `GET`    | `/{id}`  | Obtiene detalles de un usuario por ID.                     | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
+| `POST`   | `/`      | Crea un nuevo usuario.                                     | SUPER_ADMIN, BRANCH_ADMIN           |
+| `DELETE` | `/{id}`  | Elimina físicamente un usuario.                            | SUPER_ADMIN, BRANCH_ADMIN           |
 
 ## Módulo: Sucursales (`/api/v1/branches`)
 
@@ -44,13 +44,13 @@ Este documento registra todos los endpoints expuestos por la API, organizados po
 
 ## Módulo: Envíos (`/api/v1/shipments`)
 
-| Método  | Endpoint                    | Descripción                                             | Acceso                          |
-|:--------|:----------------------------|:--------------------------------------------------------|:--------------------------------|
-| `POST`  | `/`                         | Crea un nuevo envío con sus paquetes y destinatario.    | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
+| Método  | Endpoint                    | Descripción                                                   | Acceso                              |
+|:--------|:----------------------------|:--------------------------------------------------------------|:------------------------------------|
+| `POST`  | `/`                         | Crea un nuevo envío con sus paquetes y destinatario.          | BRANCH_ADMIN, EMPLOYEE, CLIENT      |
 | `GET`   | `/`                         | Obtiene la lista paginada y simplificada de todos los envíos. | SUPER_ADMIN, BRANCH_ADMIN, EMPLOYEE |
-| `GET`   | `/{trackingNumber}`         | Obtiene los detalles de un envío por su número de guía. | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
-| `PATCH` | `/{trackingNumber}/status`  | Actualiza el estado de un envío.                        | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
-| `GET`   | `/{trackingNumber}/history` | Obtiene el historial de estados de un envío.            | BRANCH_ADMIN, EMPLOYEE, CLIENT  |
+| `GET`   | `/{trackingNumber}`         | Obtiene los detalles de un envío por su número de guía.       | BRANCH_ADMIN, EMPLOYEE, CLIENT      |
+| `PATCH` | `/{trackingNumber}/status`  | Actualiza el estado de un envío.                              | BRANCH_ADMIN, EMPLOYEE, CLIENT      |
+| `GET`   | `/{trackingNumber}/history` | Obtiene el historial de estados de un envío.                  | BRANCH_ADMIN, EMPLOYEE, CLIENT      |
 
 ## Módulo: Shared / Ubicaciones (`/api/v1/cities`)
 

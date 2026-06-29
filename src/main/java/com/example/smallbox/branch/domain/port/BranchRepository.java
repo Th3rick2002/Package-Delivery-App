@@ -15,5 +15,5 @@ public interface BranchRepository {
     Page<Branch> findAll(Pageable pageable);
     boolean existsById(Integer id);
     void update(Branch branch);
-    void deleteById(Integer id);
+    void deleteById(Integer id, java.util.UUID deletedBy);
 }

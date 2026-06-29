@@ -54,7 +54,11 @@ public class BranchPersistenceAdapter implements BranchRepository {
     }
 
     @Override
-    public void deleteById(Integer id) {
-        jpaBranchRepository.deleteById(id);
+    public void deleteById(Integer id, java.util.UUID deletedBy) {
+        jpaBranchRepository.findById(id).ifPresent(entity -> {
+            entity.setDeletedAt(java.time.LocalDateTime.now());
+            entity.setDeletedBy(deletedBy);
+            jpaBranchRepository.save(entity);
+        });
     }
 }

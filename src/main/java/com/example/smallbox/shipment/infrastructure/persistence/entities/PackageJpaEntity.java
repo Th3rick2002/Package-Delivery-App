@@ -1,5 +1,6 @@
 package com.example.smallbox.shipment.infrastructure.persistence.entities;
 
+import com.example.smallbox.shared.infrastructure.persistence.entities.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +13,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +25,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PackageJpaEntity {
+@SQLDelete(sql = "UPDATE package SET deleted_at = now() WHERE package_id = ?")
+@SQLRestriction(value = "deleted_at IS NULL")
+public class PackageJpaEntity extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "package_id")
@@ -52,22 +57,4 @@ public class PackageJpaEntity {
 
     @Column(name = "fragile")
     private Boolean fragile;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
 }

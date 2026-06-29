@@ -15,8 +15,10 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,6 +44,25 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.fullName").value("Jane Doe"))
+                .andExpect(jsonPath("$.email").value("test@example.com"));
+    }
+
+    @Test
+    void updateUser_ShouldReturnUpdatedUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        CustomUserPrincipal principal = new CustomUserPrincipal(userId, "test@example.com", "password", List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CLIENT")));
+        UserResponse response = new UserResponse(userId, "Jane Smith", "test@example.com", "77777777", "ROLE_CLIENT");
+
+        when(userService.updateUser(any(), any(), any(), any())).thenReturn(response);
+
+        mockMvc.perform(patch("/api/v1/users/{id}", userId)
+                        .with(user(principal))
+                        .with(csrf())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"Jane\",\"lastName\":\"Smith\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.fullName").value("Jane Smith"))
                 .andExpect(jsonPath("$.email").value("test@example.com"));
     }
 }

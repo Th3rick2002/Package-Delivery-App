@@ -4,6 +4,7 @@ import com.example.smallbox.shared.application.dto.ApiErrorResponse;
 import com.example.smallbox.shared.application.dto.PaginatedResponse;
 import com.example.smallbox.user.application.UserService;
 import com.example.smallbox.user.application.dto.CreateUserRequest;
+import com.example.smallbox.user.application.dto.UpdateUserRequest;
 import com.example.smallbox.user.application.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -139,8 +140,58 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'BRANCH_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        userService.deleteUser(id, principal.getUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Partially update a user's details",
+            description = "Updates specific details of a user profile based on role hierarchy and ownership rules.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User updated successfully",
+                            content = @Content(schema = @Schema(implementation = UserResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input data",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Permission denied",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "User not found",
+                            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    )
+            }
+    )
+    @PatchMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ) {
+        String role = principal.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("");
+
+        UserResponse updatedUser = userService.updateUser(
+                id,
+                request,
+                principal.getUserId(),
+                role
+        );
+        return ResponseEntity.ok(updatedUser);
     }
 }
